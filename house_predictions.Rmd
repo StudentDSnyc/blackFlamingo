@@ -1,0 +1,195 @@
+---
+title: "House_predictions"
+output: html_document
+---
+
+## OUTLINE  # TO DO replace with Paul's 
+
+1. Introduction
+2. Loading Data
+3. Visualizations
+4. Pre-Processing
+5. Model Training and Parameter Tuning
+6. Variable Importance and Feature selection
+7. Summary
+
+
+
+```{r global_options, include=FALSE}
+# set up global Knit options for all chunks
+knitr::opts_chunk$set(fig.width=6, fig.height=4, fig.align = "center", include=TRUE, echo=TRUE, warning=FALSE, message=FALSE, cache=T)
+```
+
+```{r Load Packages}
+library(data.table)
+library(dplyr)
+library(ggplot2)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r Load Data}
+# TO DO gz unpacking
+# get working directory
+fetch_data <- function(filename) {
+  dt <- fread(paste0("./data/", filename), 
+              header = TRUE,
+              sep = ",",
+              stringsAsFactors = TRUE)  # load text variables as categorical
+  dt
+}
+  
+houses <- fetch_data("train.csv")
+```
+
+```{r Exploration Numerical}
+dim(houses)
+```
+
+```{r Train Test split}
+# Test set file already separate
+```
+
+```{r }
+head(houses)
+```
+
+```{r}
+#summary(houses)  # if limited number of variables
+str(houses)
+```
+
+```{r}
+sapply(houses, class)
+```
+
+### 2.2 Getting factor levels from data description
+
+```{r factor_levels}
+## get levels of categorical features from data description
+factorLevel <- list()
+conn <- file("./data/data_description.txt", open="r")
+f <-readLines(conn)
+for (line in f){
+  if(!grepl("^[[:blank:]]", line) & grepl(": ", line)) {
+    col_name <<- trimws(gsub(":.*", "", line))
+  } else {
+    level <- trimws(gsub("\t.*", "", line))
+    if (level != "") {
+      factorLevel[[col_name]] <- c(factorLevel[[col_name]], level)
+    }
+  }
+}
+close(conn)
+
+print(factorLevel[1:6])
+```
+
+### 2.3 Checking factor levels with data
+
+```{r check_levels}
+## check if levels in description cover unique data values
+for (varname in names(factorLevel)) {
+  levelDiff <- setdiff(unique(house_train[[varname]]), 
+                       factorLevel[[varname]])
+  if(length(levelDiff)) {
+    print(paste(varname, 
+                paste(levelDiff, collapse = ", "), 
+                sep = ": "))
+  }
+}
+```
+
+
+### 2.4 Fixing level names
+
+```{r fix_levels}
+## fix those levels that don't match with data
+## ignore "NA" as they will be considered as missing when converting categorical to factors
+
+unique(house_train$MSZoning)
+factorLevel$MSZoning
+factorLevel$MSZoning[2] <- "C (all)"
+
+unique(house_train$Neighborhood)
+factorLevel$Neighborhood
+factorLevel$Neighborhood[13] <- "NAmes"
+
+unique(house_train$BldgType)
+factorLevel$BldgType
+factorLevel$BldgType[c(2,3,5)] <- c("2fmCon","Duplex","Twnhs")
+
+unique(house_train$Exterior2nd)
+factorLevel$Exterior2nd
+factorLevel$Exterior2nd[c(17,6,3)] <- c("Wd Shng","CmentBd","Brk Cmn")
+
+## Get levels that only appear in the dataset
+for (varname in names(factorLevel)) {
+  factorLevel[[varname]] <- intersect(factorLevel[[varname]],
+                                      unique(house_train[[varname]]))
+}
+
+## Re-run the previous cell to double check
+```
+
+### 2.5 Converting column data types
+
+```{r convert_types}
+## convert column datatype to numeric / factor
+## On training dataset
+for (varname in names(house_train)[-1]) {
+  if (varname %in% names(factorLevel)) {
+    house_train[[varname]] <- factor(house_train[[varname]], 
+                                     levels = factorLevel[[varname]])
+  } else {
+    house_train[[varname]] <- as.numeric(house_train[[varname]])
+  }
+}
+
+## On testing dataset
+for (varname in names(house_test)[-1]) {
+  if (varname %in% names(factorLevel)) {
+    house_test[[varname]] <- factor(house_test[[varname]], 
+                                    levels = factorLevel[[varname]])
+  } else {
+    house_test[[varname]] <- as.numeric(house_test[[varname]])
+  }
+}
+```
+
+
+### 2.6 (Optional) Saving data
+
+```{r save_loaded}
+house_train$Id <- NULL
+rownames(house_test) <- house_test$Id
+house_test$Id <- NULL
+save(house_train, house_test, file = "./house_loaded.RData")
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
