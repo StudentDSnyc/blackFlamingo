@@ -29,6 +29,37 @@ for (column in to.impute){
   houses.test[[column]] <- impute.mode(houses.test, column) 
 }
 
+
+# Impute mode on column based on another column:
+    #df is a dataframe
+    #x is a vector of column names for imputation
+    #y is a column name that the imputations in x will be based on (must be categorical)
+    #type is the type of imputation method consistent with impute() in Hmisc library
+
+ImputeDependent = function(df, x, y, type = mode) {
+  require(Hmisc)
+  for (column in x){
+    #print(column)
+    for (level in levels(df[[y]])){
+      #print(level)
+      missing_level = df[df[[y]] == level, c(column)]
+      #print(missing_level)
+      imputed_level <- impute(missing_level, type)
+      #print(imputed_level)
+      df[df[[y]] == level, c(column)] = imputed_level
+    }
+  }
+  return(df)
+}
+
+# Call ImputeDependent on x = "MSZoning" and y = "Neighborhood"
+ImputeDependent(house.test, "MSZoning", "Neighborhood", type = mode)
+
+# Call ImputeDependent on x = "Exterior1st" and y = "Exterior2nd" and
+# vice versa
+ImputeDependent(house.test, "Exterior1st", "Exterior2nd", type = mode)
+ImputeDependent(house.test, "Exterior2nd", "Exterior1st", type = mode)
+
 # Impute LotFrontage from LotArea
 
 # Possible imputation strategies
