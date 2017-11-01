@@ -359,12 +359,101 @@ NA.analysis(rbind(houses.train, houses.test))
 
 ```
 
+### Releveling variables for which 'NA' does not represent a missing value but rather it represents 'Not Applicable' according to the variable documentation
+
 ```{r }
+#Alley
+house$Alley = as.character(house$Alley)
+house$Alley[is.na(house$Alley)] = 'NA'
+house$Alley = as.factor(house$Alley)
+#levels(house$Alley) #Uncomment to inspect
+
+#Fence
+house$Fence = as.character(house$Fence)
+house$Fence[is.na(house$Fence)] = 'NA'
+house$Fence = as.factor(house$Fence)
+#levels(house$Fence) 
+
+#GarageFinish
+house$GarageFinish = as.character(house$GarageFinish)
+house$GarageFinish[is.na(house$GarageFinish)] = 'NA'
+house$GarageFinish = as.factor(house$GarageFinish)
+#levels(house$GarageFinish) 
+
+#GarageYrBlt
+house$GarageYrBlt = as.character(house$GarageYrBlt)
+house$GarageYrBlt[is.na(house$GarageYrBlt)] = 'NA'
+house$GarageYrBlt = as.factor(house$GarageYrBlt)
+#levels(house$GarageYrBlt) 
+# There is a problem with the second to last level here: we have a year of 2207. Will replace
+# with 2007:
+levels(house$GarageYrBlt)[103] = "2007"
+#levels(house$GarageYrBlt) 
+
+#GarageType
+house$GarageType = as.character(house$GarageType)
+house$GarageType[is.na(house$GarageType)] = 'NA'
+house$GarageType = as.factor(house$GarageType)
+#levels(house$GarageType) 
+
+#BsmtExposure
+house$BsmtExposure = as.character(house$BsmtExposure)
+house$BsmtExposure[is.na(house$BsmtExposure)] = 'NA'
+house$BsmtExposure = as.factor(house$BsmtExposure)
+#levels(house$BsmtExposure)
+
+#BsmtCond
+house$BsmtCond = as.character(house$BsmtCond)
+house$BsmtCond[is.na(house$BsmtCond)] = 'NA'
+house$BsmtCond = as.factor(house$BsmtCond)
+#levels(house$BsmtCond)
+
+#BsmtQual
+house$BsmtQual = as.character(house$BsmtQual)
+house$BsmtQual[is.na(house$BsmtQual)] = 'NA'
+house$BsmtQual = as.factor(house$BsmtQual)
+#levels(house$BsmtQual)
+
+#BsmtFinType1
+house$BsmtFinType1 = as.character(house$BsmtFinType1)
+house$BsmtFinType1[is.na(house$BsmtFinType1)] = 'NA'
+house$BsmtFinType1 = as.factor(house$BsmtFinType1)
+#levels(house$BsmtFinType1)
+
+#BsmtFinType2
+house$BsmtFinType2 = as.character(house$BsmtFinType2)
+house$BsmtFinType2[is.na(house$BsmtFinType2)] = 'NA'
+house$BsmtFinType2 = as.factor(house$BsmtFinType2)
+#levels(house$BsmtFinType2)
+
+#FireplaceQu
+house$FireplaceQu = as.character(house$FireplaceQu)
+house$FireplaceQu[is.na(house$FireplaceQu)] = 'NA'
+house$FireplaceQu = as.factor(house$FireplaceQu)
+#levels(house$FireplaceQu)
+
+#MiscFeature
+house$MiscFeature = as.character(house$MiscFeature)
+house$MiscFeature[is.na(house$MiscFeature)] = 'NA'
+house$MiscFeature = as.factor(house$MiscFeature)
+#levels(house$MiscFeature)
+
+#PoolQC
+house$PoolQC = as.character(house$PoolQC)
+house$PoolQC[is.na(house$PoolQC)] = 'NA'
+house$PoolQC = as.factor(house$PoolQC)
+#levels(house$PoolQC)
+
 
 ```
 
-```{r}
+### **TO DISCUSS**: Missingness in LotFrontage appears to be related to the LotConfig variable in that over half of the missing values come from LotConfigs of 'Inside'. Consider imputing with the mean LotFrontage value for LotConfigs == 'Inside'.
 
+```{r}
+library(dplyr)
+lot.info = house %>% select(LotFrontage, LotConfig, LotArea, LotShape)
+lf.missing = lot.info[is.na(lot.info$LotFrontage),]
+group_by(lf.missing, LotConfig) %>% summarise(percent = n()/nrow(lf.missing))
 ```
 
 ```{r}
