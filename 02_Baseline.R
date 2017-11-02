@@ -10,17 +10,8 @@ source("Helpers.R")
 # Load Data
 load("./house_imputed.RData") # Loads houses.train and houses.test
 
-# Split our data into a train and test set - 80/20
-set.seed(0)
-split_ratio = 0.8
-train = sample(1:nrow(houses.train), nrow(houses.train)*split_ratio)
-
-private.train = houses.train[train,]
-private.test = houses.train[-train,]
-
-# Baseline linear model
+# Take log of house price label
 houses.train$SalePrice <- log(houses.train$SalePrice + 1)
-model.baseline <- lm(SalePrice ~ ., data=private.train)
 
 plot(model.baseline)
 
@@ -29,8 +20,9 @@ private.test[which(private.test$Condition2 %in% c("PosA", "RRNn")),]$Condition2 
 private.test[which(private.test$Exterior1st %in% c("ImStucc")),]$Exterior1st <- "VinylSd"
 ## Not sure how to handle missing factor levels in test set
 
-#Create Dummy Variables
-features.to.encode <- c("MSZoning", "OverallQual", "OverallCond") # test with a few variables
+#Create Dummy Variables (full training data)
+# encode using caret::dummyVars
+features.to.encode <- c("MSZoning", "OverallQual", "OverallCond", "ExterCond") # test with a few variables
 f <- paste("~", paste(features.to.encode, collapse="+"))
 encoder <- caret::dummyVars(as.formula(f),
                             data = houses.train,
@@ -38,11 +30,21 @@ encoder <- caret::dummyVars(as.formula(f),
                             fullRank = FALSE) # check meaning of this. Includes no interactions between variables e.g. feature1:feature2
 encoded.houses.train <- predict(encoder, houses.train)
 
-print(colnames(encoded.houses.train))
+encoded.houses.train <- cbind(as.data.frame(encoded.houses.train), houses.train$SalePrice)
+# rename imported column 
+colnames(encoded.houses.train)[which(names(encoded.houses.train) == "houses.train$SalePrice")] <- "SalePrice"
 
+# Split our data into a train and test set - 80/20
+set.seed(0)
+split_ratio = 0.8
+train = sample(1:nrow(houses.train), nrow(encoded.houses.train)*split_ratio)
 
+encoded.private.train = encoded.houses.train[train,]
+encoded.private.test = encoded.houses.train[-train,]
 
-predicted <- predict(model.baseline, private.test, na.action = na.exclude) # fails: new levels in test  
-actual <- private.test$SalePrice
+# Baseline linear model
+model.baseline <- lm(SalePrice ~ ., data=encoded.private.train)
+predicted <- predict(model.baseline, encoded.private.test, na.action = na.exclude) 
+actual <- encoded.private.test$SalePrice
 
 sqrt(mean((predicted-actual)^2))
