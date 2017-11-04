@@ -61,24 +61,17 @@ ImputeDependent(house.test, "Exterior1st", "Exterior2nd", type = mode)
 ImputeDependent(house.test, "Exterior2nd", "Exterior1st", type = mode)
 
 # Impute LotFrontage from LotArea
+impute.log <- lm(log(LotFrontage) ~ log(LotArea), data = houses.train)
 
-# Possible imputation strategies
-houses.all <- rbind(houses.train, houses.test)
-impute.linear1 <- lm(LotFrontage ~ LotArea, data = houses.all)
-impute.linear2 <- lm(LotFrontage ~ 0 + LotArea, data = houses.all)
-impute.log1 <- lm(LotFrontage ~ log(LotArea), data = houses.all)
-impute.log2 <- lm(LotFrontage ~ 0 + log(LotArea), data = houses.all)
-
-# Justification for picking impute.log2:
+# Justification for impute.log:
 # In the physical world, area is proportional to length squared
-# Also, when the area is 0, the length should be 0
 
-# Impute train using log2 model
-imputed <- predict(impute.log2, houses.train)
+# Impute train using log model
+imputed <- exp(predict(impute.log, houses.train))
 houses.train$LotFrontage[is.na(houses.train$LotFrontage)] <- imputed[is.na(houses.train$LotFrontage)]
 
 # Impute test using log2 model
-imputed <- predict(impute.log2, houses.test)
+imputed <- exp(predict(impute.log, houses.test))
 houses.test$LotFrontage[is.na(houses.test$LotFrontage)] <- imputed[is.na(houses.test$LotFrontage)]
 
 # Impute GarageYrBlt using YearBuilt
