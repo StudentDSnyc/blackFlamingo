@@ -1,40 +1,25 @@
-source("02_Baseline.R")
+source("03_Baseline.R")
 house = load("./house_imputed.RData")
 
 # private.train is a variable containing 80% of our given data, chosen randomly
 # private.test is a variable containing 20% of our given data, chosen randomly
-# Create a private test set without SalePrice
 private.test$SalePrice = as.numeric(private.test$SalePrice)
+
+# Create a private test set without SalePrice
 privatetest.noSP = private.test[ , -which(names(private.test) %in% c("SalePrice"))]
+housestest.noSP = houses.test[ , -which(names(houses.test) %in% c("SalePrice"))]
 
 library(gbm)
-
-# Boosting baseline: fitting 10,000 trees with a depth of 4 and shrinkage rate 
-# of 0.001 (all the defaults).
-set.seed(0)
-boost.baseline = gbm(SalePrice ~ ., data = private.train,
-                   distribution = "gaussian",
-                   n.trees = 10000,
-                   interaction.depth = 4,
-                   shrinkage = 0.001)
-
-summary(boost.baseline)
-
-# Predict on private.test:
-boost.baseline.test = predict(boost.baseline, newdata = privatetest.noSP, n.trees = 1)
-
-# Calculate RMSE:
-baseline.RMSE = sqrt(mean((boost.baseline.test - private.test$SalePrice)^2))
-# 0.3721532
-
-# Tuning 
 library(caret)
 
-# Cross-validation details; include verboseIter = TRUE to print out the
-# iteration number and track progress.
+# Tuning across four hyperparameters
+
+# Define cross-validation details to be used in the tuning process
+# Include verboseIter = TRUE to print out the iteration number and track progress.
 fitControl <- trainControl(method = "cv", number = 5, verboseIter = TRUE)
 
-# Specify a grid of all possible tuning parameter combos
+# Specify a grid of all possible tuning parameter combos; use expand.grid to allow
+# for multiple parameters to change
 gbmGrid = expand.grid(interaction.depth = seq(4, 10, by = 2),
                       n.trees = seq(500, 1500, by = 250),
                       shrinkage = 10^seq(-3, -1, by = 1),
@@ -56,8 +41,9 @@ gbmTuneTest$bestTune
 #             and n.minobsinode = 10.
 
 
-# Train an informed model based on the above (coarse-search-found) 
-# tuning parameters.
+# Train a model based on the above (coarse-search-found) tuning parameters
+# Note: Boost defaults are 100 trees, interaction depth of 4, shrinkage rate of 0.001,
+# and minimum observations per node is 10.
 set.seed(0)
 boost.tuned = gbm(log(SalePrice) ~ ., data = private.train,
                      distribution = "gaussian",
@@ -66,11 +52,28 @@ boost.tuned = gbm(log(SalePrice) ~ ., data = private.train,
                      shrinkage = 0.01)
 
 # Predict on private.test
-boost.tuned.test = predict(boost.tuned, newdata = privatetest.noSP, n.trees = 1)
+boost.tuned.test = predict(boost.tuned, newdata = privatetest.noSP, n.trees = 1500)
 
-# Calculate RMSE:
+# Calculate test RMSE:
 tuned.RMSE = sqrt(mean((boost.tuned.test - log(private.test$SalePrice))^2))
-# 0.3697696
+# 0.1349814
+
+
+# Retrain on full training set houses.train
+set.seed(0)
+boost.best = gbm(log(SalePrice) ~ ., data = houses.train,
+                  distribution = "gaussian",
+                  n.trees = 1500,
+                  interaction.depth = 8,
+                  shrinkage = 0.01)
+
+# Predict on full test set houses.test
+boost.best.prediction = predict(boost.best, newdata = houses.test, n.trees = 1500)
+
+# Create submission file
+write.csv(data.frame(Id = 1461:2919, SalePrice = exp(boost.best.prediction)), 
+          paste(format(Sys.time(),'%Y-%m-%d %H-%M-%S'), "house_submission.csv"), 
+          row.names = FALSE)
 
 
 
@@ -78,6 +81,25 @@ tuned.RMSE = sqrt(mean((boost.tuned.test - log(private.test$SalePrice))^2))
 ###############################################################################
 ###############################################################################
 # Unused code
+
+# # Boosting baseline: fitting 10,000 trees with a depth of 4 and shrinkage rate 
+# # of 0.001 (all the defaults).
+# set.seed(0)
+# boost.baseline = gbm(SalePrice ~ ., data = private.train,
+#                      distribution = "gaussian",
+#                      n.trees = 10000,
+#                      interaction.depth = 4,
+#                      shrinkage = 0.001)
+# 
+# summary(boost.baseline)
+# 
+# # Predict on private.test:
+# boost.baseline.test = predict(boost.baseline, newdata = privatetest.noSP, n.trees = seq(1, 10000))
+# 
+# # Calculate RMSE:
+# baseline.RMSE = sqrt(mean((boost.baseline.test - private.test$SalePrice)^2))
+# # 0.3721532
+
 
 # #Now we wish to tune the number of trees using all other default values:
 # #Number of trees to test: 100, 200, 300, ..., 10000
