@@ -4,6 +4,7 @@ library(dplyr)
 library(ggplot2)
 library(caret)
 library(vtreat)
+library(car)
 
 # Load Helper Functions
 source("Helpers.R")
@@ -37,12 +38,6 @@ private.test <- as.data.frame(private.test)
 houses.train <- as.data.frame(houses.train)
 houses.test <- as.data.frame(houses.test)
 
-# Take log of house price label
-private.train$SalePrice <- log(private.train$SalePrice + 1)
-private.test$SalePrice <- log(private.test$SalePrice + 1)
-houses.train$SalePrice <- log(houses.train$SalePrice + 1)
-houses.test$SalePrice <- log(houses.test$SalePrice + 1)
-
 # One-hot encode categorical features using vtreat
 # Scale all features including dummy ones per: https://stats.stackexchange.com/questions/69568/whether-to-rescale-indicator-binary-dummy-predictors-for-lasso
 encoded.private.train <- encode.scale.df(private.train[ , -which(names(private.train) == "SalePrice")])
@@ -66,10 +61,10 @@ encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
 
 
 # Save encoded dataframes
-# save(encoded.private.train, file = "./encoded.private.train.RData")
-# save(encoded.private.test, file = "./encoded.private.test.RData")
-# save(encoded.houses.train, file = "./encoded.houses.train.RData")
-# save(encoded.houses.test, file = "./encoded.houses.test.RData")
+save(encoded.private.train, file = "./encoded.private.train.RData")
+save(encoded.private.test, file = "./encoded.private.test.RData")
+save(encoded.houses.train, file = "./encoded.houses.train.RData")
+save(encoded.houses.test, file = "./encoded.houses.test.RData")
 
 #######################
 # Baseline Linear Model
@@ -79,10 +74,18 @@ encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
 # Baseline linear model
 model.baseline <- lm(SalePrice ~ ., data=encoded.private.train)
 summary(model.baseline)
-#plot(model.baseline) # review assumptions
 
-predicted <- predict(model.baseline, encoded.private.test, na.action = na.exclude) 
-actual <-private.test$SalePrice
+bc <- boxCox(model.baseline)
+bc.lambda = bc$x[which(bc$y == max(bc$y))]
+
+x <- encoded.private.train %>% select(-SalePrice)
+y <- (encoded.private.train$SalePrice^bc.lambda - 1)/bc.lambda
+
+model.bc <- lm(y ~ ., data=x)
+
+predicted <- predict(model.bc, encoded.private.test, na.action = na.exclude) 
+predicted <- log(unbox(predicted, bc.lambda))
+actual <-log(private.test$SalePrice)
 
 # RMSE
 sqrt(mean((predicted-actual)^2))
@@ -98,37 +101,38 @@ grid_alpha = seq(0, 1, length=21)
 
 # Cross-Validation for alpha & lambda
 set.seed(1000)
-train.control = trainControl(method = 'cv', number=10)
+train.control = trainControl(method = 'cv', number=10, verboseIter = TRUE)
 tune.grid = expand.grid(lambda = grid_lambda, alpha=grid_alpha)
-ridge.caret = train(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")], 
-                    encoded.private.train$SalePrice,
+
+glmnet.caret = train(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")], 
+                    (encoded.private.train$SalePrice^lambda - 1)/lambda,
                     method = 'glmnet',
                     trControl = train.control, 
                     tuneGrid = tune.grid)
 
-alpha <- ridge.caret$bestTune$alpha
-lambda <- ridge.caret$bestTune$lambda
+alpha <- glmnet.caret$bestTune$alpha
+lambda <- glmnet.caret$bestTune$lambda
 
-tuned.linear.pred = predict(ridge.caret, 
+tuned.linear.pred = predict(glmnet.caret, 
                             newdata = encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")])
 # RMSE
-sqrt(mean((tuned.linear.pred - private.test$SalePrice)^2))
+sqrt(mean((log(unbox(tuned.linear.pred, bc.lambda)) - log(private.test$SalePrice))^2))
 
 # Retraining on full training set
 
 x = model.matrix(SalePrice ~ ., encoded.houses.train)
-y = encoded.houses.train$SalePrice
+y = (encoded.houses.train$SalePrice^bc.lambda - 1)/bc.lambda
 z = model.matrix(SalePrice ~ ., encoded.houses.test)
 
-ridge.caret.full.training = glmnet(x, y, 
+glmnet.caret.full.training = glmnet(x, y, 
                                    alpha = alpha, 
                                    lambda = lambda)
 
-linear.pred.full.training = predict(ridge.caret.full.training, 
+linear.pred.full.training = predict(glmnet.caret.full.training, 
                                     newx = z)
 
 # Create submission file
-write.csv(data.frame(Id = 1461:2919, SalePrice = exp(linear.pred.full.training[,1])), 
+write.csv(data.frame(Id = 1461:2919, SalePrice = unbox(linear.pred.full.training[,1])), 
           paste(format(Sys.time(),'%Y-%m-%d %H-%M-%S'), "house_submission.csv"), 
           row.names = FALSE)
 

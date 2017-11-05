@@ -53,12 +53,12 @@ ImputeDependent = function(df, x, y, type = mode) {
 }
 
 # Call ImputeDependent on x = "MSZoning" and y = "Neighborhood"
-ImputeDependent(house.test, "MSZoning", "Neighborhood", type = mode)
+ImputeDependent(houses.test, "MSZoning", "Neighborhood", type = mode)
 
 # Call ImputeDependent on x = "Exterior1st" and y = "Exterior2nd" and
 # vice versa
-ImputeDependent(house.test, "Exterior1st", "Exterior2nd", type = mode)
-ImputeDependent(house.test, "Exterior2nd", "Exterior1st", type = mode)
+ImputeDependent(houses.test, "Exterior1st", "Exterior2nd", type = mode)
+ImputeDependent(houses.test, "Exterior2nd", "Exterior1st", type = mode)
 
 # Impute LotFrontage from LotArea
 impute.log <- lm(log(LotFrontage) ~ log(LotArea), data = houses.train)

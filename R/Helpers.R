@@ -35,6 +35,28 @@ impute.mode <- function(DT, column){
 }
 
 ##########################
+# Caret Summary helper functions
+##########################
+
+# untransform from box-cox given lambda
+# doesn't account for lambda = 0
+unbox <- function(data, lambda){
+  ((data * lambda) + 1)^(1/lambda)
+}
+
+# measures RMSE of x %>% unbox %>% log, used in caret cross validation
+RMSEbc <- function(data, lev = NULL, model = NULL){
+  #print(data[,"pred"])
+  fitted <- unbox(data[, "pred"], lambda)
+  seen <- unbox(data[,"obs"], lambda)
+  err <- sqrt(mean((log(seen) - log(fitted))^2, na.rm=FALSE))
+  print(err)
+  out <- c(err)
+  names(out) <- c("RMSEbc")
+  out
+}
+
+##########################
 # Encoding functions
 ##########################
 
