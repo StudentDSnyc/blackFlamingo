@@ -32,6 +32,17 @@ for (line in f){
 }
 close(conn)
 
+## Change column names starting with numbers 
+which(colnames(houses.train) %in% c("1stFlrSF", "2ndFlrSF","3SsnPorch"))
+#43, 44, 69
+colnames(houses.train)[43] = "X1stFlrSF"
+colnames(houses.train)[44] = "X2ndFlrSF"
+colnames(houses.train)[69] = "X3SsnPorch"
+
+colnames(houses.test)[43] = "X1stFlrSF"
+colnames(houses.test)[44] = "X2ndFlrSF"
+colnames(houses.test)[69] = "X3SsnPorch"
+
 # Fixing level names
 unique(houses.train$MSZoning)
 factorLevel$MSZoning
@@ -69,6 +80,7 @@ for (varname in names(houses.test)[-1]) {
     houses.test[[varname]] <- as.numeric(houses.test[[varname]])
   }
 }
+
 
 ## Save data
 houses.train$Id <- NULL
