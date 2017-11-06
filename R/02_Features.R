@@ -6,8 +6,9 @@ library("xyz")
 ##################
 # Load
 ##################
+library(data.table)
 
-load("./house_imputed.RData") 
+load("./data/house_imputed.RData") 
 class(houses.train) # "data.table" "data.frame"
 class(houses.test) # "data.table" "data.frame"
 
@@ -50,8 +51,12 @@ houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(q
 # Put SalePrice back in the last position
 setcolorder(houses, c(setdiff(names(houses), "SalePrice"), "SalePrice"))
 
+# Split back
+houses.train <- houses[1:1460,]
+houses.test <- houses[1461:2919,]
+
 ##################
 # Save
 ##################
-save(houses.train, file = "./houses.train.RData")
-save(houses.test, file = "./houses.test.RData")
+save(houses.train, file = "./data/houses.train.RData")
+save(houses.test, file = "./data/houses.test.RData")

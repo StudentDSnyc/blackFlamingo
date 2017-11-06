@@ -8,7 +8,7 @@ library(Amelia)
 source("Helpers.R")
 
 # Load Data
-load("./house_loaded.RData")
+load("./data/house_loaded.RData")
 
 # Check missing values
 houses.test$SalePrice <- 0
@@ -70,7 +70,7 @@ impute.log <- lm(log(LotFrontage) ~ log(LotArea), data = houses.train)
 imputed <- exp(predict(impute.log, houses.train))
 houses.train$LotFrontage[is.na(houses.train$LotFrontage)] <- imputed[is.na(houses.train$LotFrontage)]
 
-# Impute test using log2 model
+# Impute test using log model
 imputed <- exp(predict(impute.log, houses.test))
 houses.test$LotFrontage[is.na(houses.test$LotFrontage)] <- imputed[is.na(houses.test$LotFrontage)]
 
@@ -87,4 +87,4 @@ houses.test$GarageYrBlt[which(houses.test$GarageYrBlt == 2207)] <- 2007
 # Re-check
 NA.analysis(rbind(houses.train, houses.test))
 
-save(houses.train, houses.test, file = "./house_imputed.RData")
+save(houses.train, houses.test, file = "./data/house_imputed.RData")
