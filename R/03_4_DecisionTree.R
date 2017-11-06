@@ -1,8 +1,6 @@
-source("03_0_Baseline.R")
-house = load("./data/house_imputed.RData")
-
+load("./data/private.train.Rdata")
+load("./data/private.test.Rdata")
 # private.test and private.train loaded
-# SalePrice in both are already log(original SalePrice
 
 # Create a private test set without SalePrice  
 privatetest.noSP = private.test[ , -which(names(private.test) %in% c("SalePrice"))]

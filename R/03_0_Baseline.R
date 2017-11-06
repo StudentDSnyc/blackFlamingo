@@ -13,7 +13,6 @@ source("Helpers.R")
 # Load
 ##################
 
-#load("./data/house_imputed.RData") 
 load("./data/houses.train.RData")
 load("./data/houses.test.RData")
 class(houses.train) # "data.table" "data.frame"
@@ -29,6 +28,9 @@ split.ratio = 0.8
 train.indices = sample(1:nrow(houses.train), nrow(houses.train)*split.ratio)
 private.train = houses.train[train.indices,] # dim: 1168, 80 + engineered
 private.test = houses.train[-train.indices,] # dim: 292, 80 + engineered
+
+save(private.train, file = "./data/private.train.RData")
+save(private.test, file = "./data/private.test.RData")
 
 ##################
 # Encoding
