@@ -1,5 +1,5 @@
 source("03_0_Baseline.R")
-house = load("./house_imputed.RData")
+house = load("./data/house_imputed.RData")
 
 # private.train is a variable containing 80% of our given data, chosen randomly
 # private.test is a variable containing 20% of our given data, chosen randomly

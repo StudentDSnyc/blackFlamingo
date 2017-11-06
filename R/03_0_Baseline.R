@@ -13,7 +13,9 @@ source("Helpers.R")
 # Load
 ##################
 
-load("./house_imputed.RData") 
+#load("./data/house_imputed.RData") 
+load("./data/houses.train.RData")
+load("./data/houses.test.RData")
 class(houses.train) # "data.table" "data.frame"
 class(houses.test) # "data.table" "data.frame"
 
@@ -25,8 +27,8 @@ class(houses.test) # "data.table" "data.frame"
 set.seed(0)
 split.ratio = 0.8
 train.indices = sample(1:nrow(houses.train), nrow(houses.train)*split.ratio)
-private.train = houses.train[train.indices,] # dim: 1168, 80
-private.test = houses.train[-train.indices,] # dim: 292, 80
+private.train = houses.train[train.indices,] # dim: 1168, 80 + engineered
+private.test = houses.train[-train.indices,] # dim: 292, 80 + engineered
 
 ##################
 # Encoding
@@ -61,10 +63,10 @@ encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
 
 
 # Save encoded dataframes
-save(encoded.private.train, file = "./encoded.private.train.RData")
-save(encoded.private.test, file = "./encoded.private.test.RData")
-save(encoded.houses.train, file = "./encoded.houses.train.RData")
-save(encoded.houses.test, file = "./encoded.houses.test.RData")
+save(encoded.private.train, file = "./data/encoded.private.train.RData")
+save(encoded.private.test, file = "./data/encoded.private.test.RData")
+save(encoded.houses.train, file = "./data/encoded.houses.train.RData")
+save(encoded.houses.test, file = "./data/encoded.houses.test.RData")
 
 #######################
 # Baseline Linear Model
@@ -101,12 +103,13 @@ grid_alpha = seq(0, 1, length=21)
 
 # Cross-Validation for alpha & lambda
 set.seed(1000)
-train.control = trainControl(method = 'cv', number=10, verboseIter = TRUE)
+train.control = trainControl(method = 'repeatedcv', number=10, repeats=5, verboseIter = TRUE)
 tune.grid = expand.grid(lambda = grid_lambda, alpha=grid_alpha)
 
-glmnet.caret = train(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")], 
-                    (encoded.private.train$SalePrice^lambda - 1)/lambda,
-                    method = 'glmnet',
+x <- encoded.private.train %>% select(-SalePrice)
+y <- (encoded.private.train$SalePrice^bc.lambda - 1)/bc.lambda
+
+glmnet.caret = train(x, y, method = 'glmnet',
                     trControl = train.control, 
                     tuneGrid = tune.grid)
 

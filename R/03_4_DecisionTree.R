@@ -1,5 +1,5 @@
 source("03_0_Baseline.R")
-house = load("./house_imputed.RData")
+house = load("./data/house_imputed.RData")
 
 # private.test and private.train loaded
 # SalePrice in both are already log(original SalePrice
