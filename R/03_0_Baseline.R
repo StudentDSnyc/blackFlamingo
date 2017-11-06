@@ -13,14 +13,8 @@ source("Helpers.R")
 # Load
 ##################
 
-<<<<<<< HEAD
-# load("./house_imputed.RData") 
-load("./houses.train.RData")
-load("./houses.test.RData")
-=======
 load("./data/houses.train.RData")
 load("./data/houses.test.RData")
->>>>>>> ccf2d1f9699303964cefe1b1dcdea4fdba63e08d
 class(houses.train) # "data.table" "data.frame"
 class(houses.test) # "data.table" "data.frame"
 
@@ -114,7 +108,6 @@ set.seed(1000)
 train.control = trainControl(method = 'repeatedcv', number=10, repeats=5, verboseIter = TRUE)
 tune.grid = expand.grid(lambda = grid_lambda, alpha=grid_alpha)
 
-<<<<<<< HEAD
 # test add interactions
 # library("xyz")
 # result <- xyz_regression(data.matrix(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")]),
@@ -151,20 +144,19 @@ tune.grid = expand.grid(lambda = grid_lambda, alpha=grid_alpha)
 
 # end test variations
 
-glmnet.caret = train(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")], 
-                    (encoded.private.train$SalePrice^bc.lambda - 1)/bc.lambda,
-                    method = 'glmnet',
-=======
+
 x <- encoded.private.train %>% select(-SalePrice)
 y <- (encoded.private.train$SalePrice^bc.lambda - 1)/bc.lambda
 
 glmnet.caret = train(x, y, method = 'glmnet',
->>>>>>> ccf2d1f9699303964cefe1b1dcdea4fdba63e08d
                     trControl = train.control, 
                     tuneGrid = tune.grid)
 
 alpha <- glmnet.caret$bestTune$alpha
 lambda <- glmnet.caret$bestTune$lambda
+
+tuned.linear.pred = predict(glmnet.caret, 
+                            newdata = encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")])
 
 # RMSE
 sqrt(mean((log(unbox(tuned.linear.pred, bc.lambda)) - log(private.test$SalePrice))^2))
@@ -187,7 +179,7 @@ linear.pred.full.training = predict(glmnet.caret.full.training,
 
 
 # Create submission file
-write.csv(data.frame(Id = 1461:2919, SalePrice = unbox(linear.pred.full.training[,1])), 
+write.csv(data.frame(Id = 1461:2919, SalePrice = unbox(linear.pred.full.training[,1], bc.lambda)), 
           paste(format(Sys.time(),'%Y-%m-%d %H-%M-%S'), "house_submission.csv"), 
           row.names = FALSE)
 
