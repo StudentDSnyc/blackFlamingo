@@ -14,6 +14,16 @@ class(houses.test) # "data.table" "data.frame"
 
 houses = rbind(houses.train, houses.test) # need to only do feature engineering that doesn't leak information
 
+# Check for constant features
+houses[,sapply(houses, function(x) length(unique(x))) <= 1]
+
+# Find features with low variances
+colnames(houses)[caret::nearZeroVar(houses, saveMetrics = F)]
+# Drop features - commenting because worst results
+# houses <-houses[, -which(names(houses) %in% c("Utilities", "RoofMatl")), with=FALSE]
+
+
+
 # Living Area http://homeguides.sfgate.com/calculate-living-area-square-footage-33755.html 
 houses[, c("Adj.GrLivArea") := list(BsmtFinSF1+BsmtFinSF2+GrLivArea)]
 
@@ -22,12 +32,12 @@ houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + .5*HalfBath + BsmtFullBat
 houses[BsmtFinSF1==00, TotalBath := list(FullBath + .5*HalfBath)]
 
 # Interactions # Prints interaction but not sure how to create the features we need or get model using them
-result <- xyz_regression(data.matrix(houses[1:1460, -which(names(houses) == "SalePrice"), with=FALSE]),
-               houses[1:1460, ][["SalePrice"]], # using list subsetting '[[' to access data.table column (fast)
-               lambdas = 10^seq(1, -3, length = 10), n_lambda = 10,
-               alpha = 0.1, L = 10,
-               standardize = TRUE,
-               standardize_response = TRUE)
+# result <- xyz_regression(data.matrix(houses[1:1460, -which(names(houses) == "SalePrice"), with=FALSE]),
+#                houses[1:1460, ][["SalePrice"]], # using list subsetting '[[' to access data.table column (fast)
+#                lambdas = 10^seq(1, -3, length = 10), n_lambda = 10,
+#                alpha = 0.1, L = 10,
+#                standardize = TRUE,
+#                standardize_response = TRUE)
 
 # Interaction effect:
 # Interaction effect: (26,72) coefficient: 0.2037225 # MasVnrArea PoolQC
@@ -45,6 +55,7 @@ result <- xyz_regression(data.matrix(houses[1:1460, -which(names(houses) == "Sal
 
 # Variable for MasVnrArea/ PoolQC effect? doesn't make sense (only 3 rows applicable)
 # houses[, c("PoolMasVnrArea.interaction") := list(with(houses, interaction(quantile(houses$MasVnrArea, probs = seq(0, 1, 0.05)),  PoolQC)))]
+
 houses[, c("Condition2.ExterCond.interaction") := list(with(houses, interaction(Condition2,  ExterCond)))]
 houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.05)),  LandContour)))]
 
