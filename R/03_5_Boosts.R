@@ -1,3 +1,4 @@
+source("03_0_Baseline.R")
 load("./data/private.train.Rdata")
 load("./data/private.test.Rdata")
 # private.test and private.train loaded
@@ -57,7 +58,8 @@ boost.tuned.test = predict(boost.tuned, newdata = privatetest.noSP, n.trees = 15
 
 # Calculate test RMSE:
 tuned.RMSE = sqrt(mean((boost.tuned.test - log(private.test$SalePrice))^2))
-# 0.1349814
+tuned.RMSE
+# 0.1360507
 
 
 # Retrain on full training set houses.train
@@ -76,7 +78,7 @@ write.csv(data.frame(Id = 1461:2919, SalePrice = exp(boost.best.prediction)),
           paste(format(Sys.time(),'%Y-%m-%d %H-%M-%S'), "house_submission.csv"), 
           row.names = FALSE)
 
-
+# 2017-11-06 19:56:11 house_submission.csv
 
 
 ###############################################################################
