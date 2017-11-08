@@ -33,11 +33,11 @@ from sklearn.model_selection import train_test_split
 seed = 10
 test_ratio = 0.2
 
-X = houses_train.loc[:, houses_train.columns != "SalePrice"]
-y = houses_train.loc[:, houses_train.columns == "SalePrice"]
+X = houses_train.loc[:, houses_train.columns != "SalePrice"].values # convert to np.array
+y = houses_train.loc[:, houses_train.columns == "SalePrice"].values
 
 # Take log of SalePrice
-y = np.log(y + 1)
+y = np.log(y + 1).ravel()
 
 
 X_pr_train, X_pr_test, y_pr_train, y_pr_test = train_test_split(X, y, test_size=test_ratio, random_state=seed)
@@ -47,7 +47,7 @@ X_pr_train, X_pr_test, y_pr_train, y_pr_test = train_test_split(X, y, test_size=
 from xgboost import XGBClassifier
 
 model = XGBClassifier()
-model.fit(X_pr_train, y_pr_train.ravel())
+model.fit(X_pr_train, y_pr_train)
 
 # make predictions for test data
 y_pr_pred = model.predict(X_pr_test)
