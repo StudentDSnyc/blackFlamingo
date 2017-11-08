@@ -1,4 +1,4 @@
-source("03_0_Baseline.R")
+source("03_0_SplitEncode.R")
 load("./data/private.train.Rdata")
 load("./data/private.test.Rdata")
 # private.test and private.train loaded
