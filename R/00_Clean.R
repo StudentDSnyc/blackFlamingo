@@ -34,14 +34,14 @@ close(conn)
 
 ## Change column names starting with numbers 
 which(colnames(houses.train) %in% c("1stFlrSF", "2ndFlrSF","3SsnPorch"))
-#43, 44, 69
-colnames(houses.train)[43] = "X1stFlrSF"
-colnames(houses.train)[44] = "X2ndFlrSF"
-colnames(houses.train)[69] = "X3SsnPorch"
+#44, 45, 70
+colnames(houses.train)[44] = "X1stFlrSF"
+colnames(houses.train)[45] = "X2ndFlrSF"
+colnames(houses.train)[70] = "X3SsnPorch"
 
-colnames(houses.test)[43] = "X1stFlrSF"
-colnames(houses.test)[44] = "X2ndFlrSF"
-colnames(houses.test)[69] = "X3SsnPorch"
+colnames(houses.test)[44] = "X1stFlrSF"
+colnames(houses.test)[45] = "X2ndFlrSF"
+colnames(houses.test)[70] = "X3SsnPorch"
 
 # Fixing level names
 unique(houses.train$MSZoning)
@@ -86,5 +86,5 @@ for (varname in names(houses.test)[-1]) {
 houses.train$Id <- NULL
 rownames(houses.test) <- houses.test$Id
 houses.test$Id <- NULL
-save(houses.train, houses.test, file = "./house_loaded.RData")
+save(houses.train, houses.test, file = "./data/house_loaded.RData")
 
