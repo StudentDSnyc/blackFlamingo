@@ -3,7 +3,7 @@ library(data.table)
 
 # Assumes data directory
 fetch_data <- function(filename) {
-  dt <- fread(paste0("./data/", filename),  # faster option than read.csv
+  dt <- fread(paste0("../Data/", filename),  # faster option than read.csv
               header = TRUE,
               sep = ",",
               stringsAsFactors = FALSE, # load text variables as categorical

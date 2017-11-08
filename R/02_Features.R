@@ -69,5 +69,12 @@ houses.test <- houses[1461:2919,]
 ##################
 # Save
 ##################
+
+# to .RData
 save(houses.train, file = "./data/houses.train.RData")
 save(houses.test, file = "./data/houses.test.RData")
+
+# to .csv
+fwrite(houses.train, file = "../Data/features.houses.train.csv", quote=F, row.names=T)
+fwrite(houses.test, file = "../Data/features.houses.test.csv", quote=F, row.names=T)
+
