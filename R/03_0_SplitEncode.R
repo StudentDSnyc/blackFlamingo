@@ -13,7 +13,7 @@ source("Helpers.R")
 # Load
 ##################
 
-source('02_Features.R')
+source('./02_Features.R')
 load("./data/houses.train.RData")
 load("./data/houses.test.RData")
 class(houses.train) # "data.table" "data.frame"

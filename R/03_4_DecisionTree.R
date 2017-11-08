@@ -1,7 +1,25 @@
-source("03_0_SplitEncode.R")
-load("./data/private.train.Rdata")
-load("./data/private.test.Rdata")
-# private.test and private.train loaded
+# Load Libraries
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(vtreat)
+library(car)
+
+# Load Helper Functions
+source("Helpers.R")
+
+##################
+# Load
+##################
+source("./03_0_SplitEncode.R")
+load("./data/private.train.RData")
+load("./data/private.test.RData")
+
+######################
+# Basic Decision Tree
+######################
+
 
 # Create a private test set without SalePrice  
 #privatetest.noSP = private.test[ , -which(names(private.test) %in% c("SalePrice"))]
@@ -34,6 +52,9 @@ tree.baseline.RMSE = sqrt(mean((unpruned.tree.pred - log(private.test$SalePrice)
 tree.baseline.RMSE
 # 0.1857989
 
+######################
+# Pruning
+######################
 
 # Now investigate results when pruning is introduced
 # Pruning the tree to have the optimal number of terminal nodes according to 
@@ -57,7 +78,7 @@ pruned.baseline.RMSE
 #        pruned tree's RMSE approached that of the unpruned tree. This suggests
 #        that our tree should be left unpruned. 
 
-# Since the unpruned tree was better, we retrain on the full test set using the
+# NOTE: Since the unpruned tree was better, we retrain on the full test set using the
 # unpruned tree. 
 
 # Retrain on full training set houses.train
