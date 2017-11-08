@@ -1,13 +1,29 @@
-source("03_0_SplitEncode.R")
-load("./data/private.train.Rdata")
-load("./data/private.test.Rdata")
-# private.test and private.train loaded
+# Load Libraries
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(vtreat)
+library(car)
 
-# private.train is a variable containing 80% of our given data, chosen randomly
-# private.test is a variable containing 20% of our given data, chosen randomly
-private.test$SalePrice = as.numeric(private.test$SalePrice)
+# Load Helper Functions
+source("Helpers.R")
+
+##################
+# Load
+##################
+source("./03_0_SplitEncode.R")
+load("./data/private.train.RData")
+load("./data/private.test.RData")
+
+
+
+##################
+# Boosted Tree 
+##################
 
 # Create a private test set without SalePrice
+private.test$SalePrice = as.numeric(private.test$SalePrice)
 privatetest.noSP = private.test[ , -which(names(private.test) %in% c("SalePrice"))]
 housestest.noSP = houses.test[ , -which(names(houses.test) %in% c("SalePrice"))]
 

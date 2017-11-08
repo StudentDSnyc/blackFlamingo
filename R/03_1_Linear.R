@@ -12,8 +12,13 @@ source("Helpers.R")
 ##################
 # Load
 ##################
-source("03_0_Baseline.R")
-
+source("./03_0_SplitEncode.R")
+load("./data/private.train.RData")
+load("./data/private.test.RData")
+load("./data/encoded.private.train.RData")
+load("./data/encoded.private.test.RData")
+load("./data/encoded.houses.train.RData")
+load("./data/encoded.houses.test.RData")
 
 #######################
 # Baseline Linear Model
