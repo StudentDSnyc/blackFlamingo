@@ -15,9 +15,10 @@ houses.test$SalePrice <- 0
 NA.analysis(rbind(houses.train, houses.test))
 
 # Columns to impute with mode
-to.impute <- c("MasVnrType", "MasVnrArea", "Utilities", "BsmtFullBath",
+to.impute <- c("MSZoning", "MasVnrType", "MasVnrArea", "Utilities", "BsmtFullBath",
                    "BsmtHalfBath", "Functional", "BsmtFinSF1", "BsmtFinSF2",
-                   "BsmtUnfSF", "TotalBsmtSF", "Electrical")
+                   "BsmtUnfSF", "TotalBsmtSF", "Electrical", "SaleType", "Exterior1st", 
+               "Exterior2nd", "KitchenQual", "GarageCars")
 
 # Impute mode on train columns
 for (column in to.impute){
@@ -83,6 +84,10 @@ houses.test$GarageYrBlt[is.na(houses.test$GarageYrBlt)] <-
 
 # Fix Outlier
 houses.test$GarageYrBlt[which(houses.test$GarageYrBlt == 2207)] <- 2007
+
+# Fix Outlier (row 1117 from houses.test) Impute GarageArea from overall mean
+houses.train$GarageArea[is.na(houses.train$GarageArea)] = round(mean(houses.train$GarageArea, na.rm=TRUE))
+houses.test$GarageArea[is.na(houses.test$GarageArea)] = round(mean(houses.test$GarageArea, na.rm=TRUE))
 
 # Re-check
 NA.analysis(rbind(houses.train, houses.test))

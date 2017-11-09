@@ -95,6 +95,17 @@ align.columns <- function(training.df, test.df) {
   test.df[names(training.df)] 
 }
 
+label.count.encode.vector <- function(vector){
+  # Replaces categorical labels with the number of occurences
+  t <- table(vector, exclude=NULL)
+  lapply(vector, function(x) t[names(t)==x])
+}
+# label.count.encoding(private.train$Condition1)
 
+label.count.encode.df <- function(df){
+  factor.columns <- sapply(df, is.factor)
+  df[factor.columns] <- lapply(df[factor.columns], label.count.encode.vector)
+  as.data.frame(sapply(df, as.numeric)) # convert created columns from 'list' to 'numeric'
+}
 
 

@@ -49,15 +49,46 @@ colnames(houses)[caret::nearZeroVar(houses, saveMetrics = F)]
 #Variable for MasVnrArea/ PoolQC  effect? doesn't seem to make sense (only 3 rows applicable)
 houses[, c("PoolMasVnrArea.interaction") := list(with(houses, interaction(quantile(houses$MasVnrArea, probs = seq(0, 1, 0.05)),  PoolQC)))]
 houses[, c("Condition2.ExterCond.interaction") := list(with(houses, interaction(Condition1,  ExterCond)))]
-houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.05)),  LandContour)))]
+houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.05)), LandContour)))]
 
 # Garage interaction (quality * number of cars)
 houses[, c("Garage.interaction") := list(with(houses, interaction(GarageCars, GarageQual)))] # Very positive effect
 
 # Additional Real Estate 'specialty' variables
 
+# Kitchen interaction (quality * number of cars)
+houses[, c("Kitchen.interaction") := list(with(houses, interaction(KitchenAbvGr, KitchenQual)))] # Negative
+
+# When house was built/ remodelled compared to neighbourhood
+houses[, c("new.old") := list((YearBuilt) - mean(YearBuilt)), by = .(Neighborhood, MSSubClass)] # Negative effect
+
 # Average (above ground) room size (compared to Neighborhood)
-houses[, c("Room.size") := (GrLivArea/ TotRmsAbvGrd)] # no effect
+houses[, c("Room.size") := round((GrLivArea/ TotRmsAbvGrd))] # no effect?
+
+# Combine sold date year and month
+houses[, c("full.YrSold") := as.numeric(sprintf("%d%02d", YrSold, MoSold))] # add 0 in front of month digit as needed
+
+# Create quarter for seasonality
+houses[, c("QuarterSold") := (MoSold)]
+houses[MoSold %in% c(1, 2, 3), c("QuarterSold")] <- 1
+houses[MoSold %in% c(4, 5, 6), c("QuarterSold")] <- 2
+houses[MoSold %in% c(7, 8, 9), c("QuarterSold")] <- 3
+houses[MoSold %in% c(10, 11, 12), c("QuarterSold")] <- 4
+houses[, c("Year.Quarter") := paste0(YrSold, QuarterSold)] # only needed to merge HPI data in
+houses[,YrSold:=NULL]
+houses[, MoSold:=NULL]
+
+# HPI <- fread(paste0("../Data/", "AmesHPI_Clean.csv"), 
+#             header = TRUE,
+#             sep = ",",
+#             stringsAsFactors = FALSE,
+#             na.strings = NULL) # don't coerce "NA" string to NA
+# 
+# houses <- merge(houses, HPI, by.x = "Year.Quarter", by.y = "Year.Quarter")
+
+# Cleanup
+# rm(HPI)
+houses[, Year.Quarter:=NULL]
 
 # Number of bathrooms. Only count basement bathrooms if there's a 'finished' basement area 
 houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + .5*HalfBath + BsmtFullBath + .5*BsmtHalfBath)] # Positive Effect
@@ -83,8 +114,8 @@ save(houses.train, file = "./data/houses.train.RData")
 save(houses.test, file = "./data/houses.test.RData")
 
 # to .csv
-fwrite(houses.train, file = "../Data/features.houses.train.csv", quote=F, row.names=T)
-fwrite(houses.test, file = "../Data/features.houses.test.csv", quote=F, row.names=T)
+fwrite(houses.train, file = "../Data/features_houses_train.csv", quote=F, row.names=T)
+fwrite(houses.test, file = "../Data/features_houses_test.csv", quote=F, row.names=T)
 
 
 
@@ -94,9 +125,6 @@ fwrite(houses.test, file = "../Data/features.houses.test.csv", quote=F, row.name
 # Rejected features
 # Living Area http://homeguides.sfgate.com/calculate-living-area-square-footage-33755.html 
 # houses[, c("Adj.GrLivArea") := list(BsmtFinSF1+BsmtFinSF2+GrLivArea)] # Negative effect (!!)
-
-# Kitchen interaction (quality * number of cars)
-# houses[, c("Kitchen.interaction") := list(with(houses, interaction(KitchenAbvGr, KitchenQual)))] # Negative
 
 # Ratio of bathrooms to bedrooms (all above ground), compared to neighbourhood ratio # Negative
 # houses[BedroomAbvGr>0, c("BathToBed") := ((FullBath + .5*HalfBath)/ BedroomAbvGr)/ mean((FullBath + .5*HalfBath)/ BedroomAbvGr), by = .(Neighborhood)]

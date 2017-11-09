@@ -48,8 +48,29 @@ private.test <- as.data.frame(private.test)
 houses.train <- as.data.frame(houses.train)
 houses.test <- as.data.frame(houses.test)
 
+##################
+# Label Count Encoding - No, just puts number of occurences right now
+##################
+# # Label Count encoding = Replaces labels with the number of occurences (for categorical columns)
+# encoded.private.train <- label.count.encode.df(private.train)
+# encoded.private.test <- label.count.encode.df(private.test)
+# encoded.houses.train <- label.count.encode.df(houses.train)
+# encoded.houses.test <- label.count.encode.df(houses.test)
+# 
+# # Scale all columns except SalePrice
+# # Scaling test sets should really be done with means from training set
+# encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")] <- scale(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")])
+# encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")] <- scale(encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")])
+# encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")] <- scale(encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")])
+# encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")] <- scale(encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")])
+
+##################
+# One hot Encoding
+##################
+
 # One-hot encode categorical features using vtreat
 # Scale all features including dummy ones per: https://stats.stackexchange.com/questions/69568/whether-to-rescale-indicator-binary-dummy-predictors-for-lasso
+
 encoded.private.train <- encode.scale.df(private.train[ , -which(names(private.train) == "SalePrice")])
 encoded.private.train['SalePrice'] <- private.train$SalePrice
 
@@ -77,10 +98,10 @@ save(encoded.houses.train, file = "./data/encoded.houses.train.RData")
 save(encoded.houses.test, file = "./data/encoded.houses.test.RData")
 
 #Save encoded dataframes as csv:
-write.csv(encoded.private.train, "../Data/encoded.private.train.csv", row.names = FALSE)
-write.csv(encoded.private.test, "../Data/encoded.private.test.csv", row.names = FALSE)
-write.csv(encoded.houses.train, "../Data/encoded.houses.train.csv", row.names = FALSE)
-write.csv(encoded.houses.test, "../Data/encoded.houses.test.csv", row.names = FALSE)
+write.csv(encoded.private.train, "../Data/encoded_private_train.csv", row.names = FALSE)
+write.csv(encoded.private.test, "../Data/encoded_private_test.csv", row.names = FALSE)
+write.csv(encoded.houses.train, "../Data/encoded_houses_train.csv", row.names = FALSE)
+write.csv(encoded.houses.test, "../Data/encoded_houses_test.csv", row.names = FALSE)
 
 
 
