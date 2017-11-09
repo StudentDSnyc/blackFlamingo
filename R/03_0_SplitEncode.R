@@ -16,8 +16,8 @@ source("Helpers.R")
 source('./02_Features.R')
 load("./data/houses.train.RData")
 load("./data/houses.test.RData")
-class(houses.train) # "data.table" "data.frame"
-class(houses.test) # "data.table" "data.frame"
+dim(houses.train) # "data.table" "data.frame"
+dim(houses.test) # "data.table" "data.frame"
 
 #########################
 # Create private test set
@@ -76,11 +76,11 @@ save(encoded.private.test, file = "./data/encoded.private.test.RData")
 save(encoded.houses.train, file = "./data/encoded.houses.train.RData")
 save(encoded.houses.test, file = "./data/encoded.houses.test.RData")
 
-#Save encoded dataframes as csvs:
-write.csv(encoded.private.train, "encoded_private_train.csv", row.names = FALSE)
-write.csv(encoded.private.test, "encoded_private_test.csv", row.names = FALSE)
-write.csv(encoded.houses.train, "encoded_houses_train.csv", row.names = FALSE)
-write.csv(encoded.houses.test, "encoded_houses_test.csv", row.names = FALSE)
+#Save encoded dataframes as csv:
+write.csv(encoded.private.train, "../Data/encoded.private.train.csv", row.names = FALSE)
+write.csv(encoded.private.test, "../Data/encoded.private.test.csv", row.names = FALSE)
+write.csv(encoded.houses.train, "../Data/encoded.houses.train.csv", row.names = FALSE)
+write.csv(encoded.houses.test, "../Data/encoded.houses.test.csv", row.names = FALSE)
 
 
 

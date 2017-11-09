@@ -159,7 +159,7 @@ plot(model.log)
 bc <- boxCox(model.baseline)
 lambda = bc$x[which(bc$y == max(bc$y))]
 x <- private.train %>% select(-SalePrice_clean)
-y <- (private.train$SalePrice_clean^lambda - 1)/lambda
+y <- (private.train$SalePrice^lambda - 1)/lambda
 
 model.bc <- lm(y ~ ., data=x)
 summary(model.bc)
