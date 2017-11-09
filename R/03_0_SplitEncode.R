@@ -43,10 +43,10 @@ write.csv(private.test, "private_test.csv", row.names = FALSE)
 ##################
 
 # Convert to data.frame (from data.table) to avoid bugs below
-private.train <- as.data.frame(private.train)
-private.test <- as.data.frame(private.test)
-houses.train <- as.data.frame(houses.train)
-houses.test <- as.data.frame(houses.test)
+# private.train <- as.data.frame(private.train)
+# private.test <- as.data.frame(private.test)
+# houses.train <- as.data.frame(houses.train)
+# houses.test <- as.data.frame(houses.test)
 
 ##################
 # Label Count Encoding - No, just puts number of occurences right now
@@ -71,24 +71,37 @@ houses.test <- as.data.frame(houses.test)
 # One-hot encode categorical features using vtreat
 # Scale all features including dummy ones per: https://stats.stackexchange.com/questions/69568/whether-to-rescale-indicator-binary-dummy-predictors-for-lasso
 
-encoded.private.train <- encode.scale.df(private.train[ , -which(names(private.train) == "SalePrice")])
-encoded.private.train['SalePrice'] <- private.train$SalePrice
+# old version with dataframes
+# encoded.private.train <- encode.scale.df(private.train[ , -which(names(private.train) == "SalePrice")])
+# encoded.private.train['SalePrice'] <- private.train$SalePrice
 
-encoded.private.test <- encode.scale.df(private.test[ , -which(names(private.test) == "SalePrice")])
-encoded.private.test['SalePrice'] <- 0
+encoded.private.train <- as.data.table(stats::model.matrix(~., data=private.train[ , -c("SalePrice")])[,-1])
+cols <- colnames(encoded.private.train)
+encoded.private.train[, (cols) := lapply(.SD, scale), .SDcols=cols]
+encoded.private.train[, c('SalePrice')] <- private.train$SalePrice
 
-encoded.houses.train <- encode.scale.df(houses.train[ , -which(names(houses.train) == "SalePrice")])
-encoded.houses.train['SalePrice'] <- houses.train$SalePrice
+encoded.private.test <- as.data.table(stats::model.matrix(~., data=private.test[ , -c("SalePrice")])[,-1])
+cols <- colnames(encoded.private.test)
+encoded.private.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
+encoded.private.test[, c('SalePrice')] <- 0
 
-encoded.houses.test <- encode.scale.df(houses.test[ , -which(names(houses.test) == "SalePrice")])
-encoded.houses.test['SalePrice'] <- 0
+encoded.houses.train <- as.data.table(stats::model.matrix(~., data=houses.train[ , -c("SalePrice")])[,-1])
+cols <- colnames(encoded.houses.train)
+encoded.houses.train[, (cols) := lapply(.SD, scale), .SDcols=cols]
+encoded.houses.train[, c('SalePrice')] <- houses.train$SalePrice
+
+encoded.houses.test <- as.data.table(stats::model.matrix(~., data=houses.test[ , -c("SalePrice")])[,-1])
+cols <- colnames(encoded.houses.test)
+encoded.houses.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
+encoded.houses.test[, c('SalePrice')] <- 0
+
 
 # Add missing columns in test set with default value equal to 0
 # This approach was chosen over binding training and test because it would leak information from test
 # Also remove columns from test not in training (no predictive value)
-encoded.private.test <- align.columns(encoded.private.train, encoded.private.test)
 
-encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
+# encoded.private.test <- align.columns(encoded.private.train, encoded.private.test)
+# encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
 
 
 # Save encoded dataframes
