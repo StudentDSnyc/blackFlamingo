@@ -112,11 +112,50 @@ levels(houses.train$Electrical)[levels(houses.train$Electrical) %in%
 
 # SaleType
 levels(houses.train$SaleType)[levels(houses.train$SaleType) %in% 
-                                c("ConLw", "ConLI", "ConLD", "Oth")] <- "Con"
+                                  c("ConLw", "ConLI", "ConLD", "Oth")] <- "Con"
 levels(houses.train$SaleType)[levels(houses.train$SaleType) %in% 
                                 c("CWD")] <- "WD"
 
+# Condition1
+levels(houses.train$Condition1)[levels(houses.train$Condition1) %in%
+                                c("RRNn")] <- "RRAn"
+levels(houses.train$Condition1)[levels(houses.train$Condition1) %in%
+                                c("RRNe")] <- "RRAe"
+levels(houses.train$Condition1)[levels(houses.train$Condition1) %in%
+                                  c("PosA")] <- "PosN"
+levels(houses.test$Condition1)[levels(houses.test$Condition1) %in%
+                                  c("RRNn")] <- "RRAn"
+levels(houses.test$Condition1)[levels(houses.test$Condition1) %in%
+                                  c("RRNe")] <- "RRAe"
+levels(houses.test$Condition1)[levels(houses.test$Condition1) %in%
+                                  c("PosA")] <- "PosN"
+# Condition2
+houses.train$Condition2 <- NULL # removing because too few levels
+houses.test$Condition2 <- NULL
 
+# HouseStyle
+levels(houses.train$HouseStyle)[levels(houses.train$HouseStyle) %in%
+                                  c("1.5Unf")] <- "1.5Fin"
+levels(houses.train$HouseStyle)[levels(houses.train$HouseStyle) %in%
+                                  c("2.5Unf")] <- "2.5Fin"
+levels(houses.test$HouseStyle)[levels(houses.test$HouseStyle) %in%
+                                  c("1.5Unf")] <- "1.5Fin"
+levels(houses.test$HouseStyle)[levels(houses.test$HouseStyle) %in%
+                                  c("2.5Unf")] <- "2.5Fin"
+
+# Make ordinal categorical OverallQual numeric
+houses.train$OverallQual <- as.numeric(houses.train$OverallQual)
+houses.test$OverallQual <- as.numeric(houses.test$OverallQual)
+
+# Make ordinal categorical OverallCond numeric
+houses.train$OverallCond <- as.numeric(houses.train$OverallCond)
+houses.test$OverallCond <- as.numeric(houses.test$OverallCond)
+
+# PoolQC
+levels(houses.train$PoolQC)[levels(houses.train$PoolQC) %in%
+                                 c("Ex", "Gd", "TA", "Fa")] <- "Pool"
+levels(houses.test$PoolQC)[levels(houses.test$PoolQC) %in%
+                                 c("Ex", "Gd", "TA", "Fa")] <- "Pool"
 
 
 # Save data

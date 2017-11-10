@@ -32,10 +32,6 @@ colnames(houses)[caret::nearZeroVar(houses, saveMetrics = F)]
 #                standardize_response = TRUE)
 
 # Interaction effect:
-# Interaction effect: (26,72) coefficient: 0.2037225 # MasVnrArea PoolQC
-# Interaction effect: (14,28) coefficient: -0.1285461 # Condition2 ExterCond    # ok maybe
-# Interaction effect: (14,38) coefficient: -0.1203811 # Condition2 TotalBsmtSF ??
-# Interaction effect: (14,67) coefficient: -0.1122927 # Condition2 OpenPorchSF
 # Interaction effect: (4,8) coefficient: -0.1066311 # LotArea LandContour       # ok makes sense
 
 # Interaction effect: (14,14) coefficient: -0.08428927
@@ -46,13 +42,15 @@ colnames(houses)[caret::nearZeroVar(houses, saveMetrics = F)]
 
 
 # Adding interaction variables
-#Variable for MasVnrArea/ PoolQC  effect? doesn't seem to make sense (only 3 rows applicable)
-houses[, c("PoolMasVnrArea.interaction") := list(with(houses, interaction(quantile(houses$MasVnrArea, probs = seq(0, 1, 0.05)),  PoolQC)))]
-houses[, c("Condition2.ExterCond.interaction") := list(with(houses, interaction(Condition1,  ExterCond)))]
-houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.05)), LandContour)))]
+houses[, c("Condition1.ExterCond.interaction") := list(with(houses, interaction(Condition1,  ExterCond)))]
+houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.1)), LandContour)))]
 
 # Garage interaction (quality * number of cars)
 houses[, c("Garage.interaction") := list(with(houses, interaction(GarageCars, GarageQual)))] # Very positive effect
+# ignored warning message. Behaviour correct
+
+# Basement interaction (quality of basement * number of (bath)rooms)
+houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
 
 # Additional Real Estate 'specialty' variables
 
@@ -94,6 +92,10 @@ houses[, Year.Quarter:=NULL]
 houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + .5*HalfBath + BsmtFullBath + .5*BsmtHalfBath)] # Positive Effect
 houses[BsmtFinSF1==00, TotalBath := list(FullBath + .5*HalfBath)]
 
+# Ratio of bathrooms to bedrooms (all above ground), compared to neighbourhood ratio # Negative
+houses[BedroomAbvGr>0, c("BathToBed") := ((FullBath + .5*HalfBath)/ BedroomAbvGr)/ mean((FullBath + .5*HalfBath)/ BedroomAbvGr), by = .(Neighborhood)]
+houses[BedroomAbvGr==0, c("BathToBed")] <- 0
+
 # Ratio: House surface to median for neighbourhood/ type of dwelling (e.g. 1-STORY 1945 & OLDER)
 houses[, c("AvgHouseLivArea.ratio") := (GrLivArea)/ mean(GrLivArea), by = .(Neighborhood, MSSubClass)] # Positive effect
 
@@ -118,17 +120,9 @@ fwrite(houses.train, file = "../Data/features_houses_train.csv", quote=F, row.na
 fwrite(houses.test, file = "../Data/features_houses_test.csv", quote=F, row.names=T)
 
 
-
-
-
-
 # Rejected features
 # Living Area http://homeguides.sfgate.com/calculate-living-area-square-footage-33755.html 
 # houses[, c("Adj.GrLivArea") := list(BsmtFinSF1+BsmtFinSF2+GrLivArea)] # Negative effect (!!)
-
-# Ratio of bathrooms to bedrooms (all above ground), compared to neighbourhood ratio # Negative
-# houses[BedroomAbvGr>0, c("BathToBed") := ((FullBath + .5*HalfBath)/ BedroomAbvGr)/ mean((FullBath + .5*HalfBath)/ BedroomAbvGr), by = .(Neighborhood)]
-# houses[BedroomAbvGr==0, c("BathToBed")] <- 0
 
 # Lot to House Ratio
 # houses[, c("LotToHouseRatio") := list(LotArea/ GrLivArea)] # Negative effect
