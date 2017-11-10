@@ -112,9 +112,10 @@ levels(houses.train$Electrical)[levels(houses.train$Electrical) %in%
 
 # SaleType
 levels(houses.train$SaleType)[levels(houses.train$SaleType) %in% 
-                                c("ConLw", "ConLI", "ConLD", "Oth")] <- "Con"
+                                  c("ConLw", "ConLI", "ConLD", "Oth")] <- "Con"
 levels(houses.train$SaleType)[levels(houses.train$SaleType) %in% 
                                 c("CWD")] <- "WD"
+
 
 # Foundation
 levels(houses.train$Foundation)[levels(houses.train$Foundation) %in% 
@@ -208,6 +209,85 @@ levels(houses.train$HeatingQC)[levels(houses.train$HeatingQC) %in%
 # SaleCondition
 levels(houses.train$SaleCondition)[levels(houses.train$SaleCondition) %in% 
                                  c("AdjLand")] <- "Abnorml"
+
+# Condition1
+levels(houses.train$Condition1)[levels(houses.train$Condition1) %in%
+                                c("RRNn")] <- "RRAn"
+levels(houses.train$Condition1)[levels(houses.train$Condition1) %in%
+                                c("RRNe")] <- "RRAe"
+levels(houses.train$Condition1)[levels(houses.train$Condition1) %in%
+                                  c("PosA")] <- "PosN"
+levels(houses.test$Condition1)[levels(houses.test$Condition1) %in%
+                                  c("RRNn")] <- "RRAn"
+levels(houses.test$Condition1)[levels(houses.test$Condition1) %in%
+                                  c("RRNe")] <- "RRAe"
+levels(houses.test$Condition1)[levels(houses.test$Condition1) %in%
+                                  c("PosA")] <- "PosN"
+# Condition2
+houses.train$Condition2 <- NULL # removing because too few levels
+houses.test$Condition2 <- NULL
+
+# HouseStyle
+levels(houses.train$HouseStyle)[levels(houses.train$HouseStyle) %in%
+                                  c("1.5Unf")] <- "1.5Fin"
+levels(houses.train$HouseStyle)[levels(houses.train$HouseStyle) %in%
+                                  c("2.5Unf")] <- "2.5Fin"
+levels(houses.test$HouseStyle)[levels(houses.test$HouseStyle) %in%
+                                  c("1.5Unf")] <- "1.5Fin"
+levels(houses.test$HouseStyle)[levels(houses.test$HouseStyle) %in%
+                                  c("2.5Unf")] <- "2.5Fin"
+
+# Make ordinal categorical OverallQual numeric
+houses.train$OverallQual <- as.numeric(houses.train$OverallQual)
+houses.test$OverallQual <- as.numeric(houses.test$OverallQual)
+
+# Make ordinal categorical OverallCond numeric
+houses.train$OverallCond <- as.numeric(houses.train$OverallCond)
+houses.test$OverallCond <- as.numeric(houses.test$OverallCond)
+
+# PoolQC
+levels(houses.train$PoolQC)[levels(houses.train$PoolQC) %in%
+                                 c("Ex", "Gd", "TA", "Fa")] <- "Pool"
+levels(houses.test$PoolQC)[levels(houses.test$PoolQC) %in%
+                                 c("Ex", "Gd", "TA", "Fa")] <- "Pool"
+
+houses.train[MSSubClass == 40]$MSSubClass <- "20"
+houses.train[MSSubClass == 45]$MSSubClass <- "50"
+houses.train[MSSubClass == 75]$MSSubClass <- "60"
+houses.train[MSSubClass == 150]$MSSubClass <- "120"
+houses.train[MSSubClass == 180]$MSSubClass <- "160"
+houses.train$MSSubClass <- droplevels(houses.train$MSSubClass)
+
+houses.test[MSSubClass == 40]$MSSubClass <- "20"
+houses.test[MSSubClass == 45]$MSSubClass <- "50"
+houses.test[MSSubClass == 75]$MSSubClass <- "60"
+houses.test[MSSubClass == 150]$MSSubClass <- "120"
+houses.test[MSSubClass == 180]$MSSubClass <- "160"
+houses.test$MSSubClass <- droplevels(houses.test$MSSubClass)
+
+houses.train$MSZoning <- droplevels(houses.train$MSZoning)
+
+houses.test$MSZoning <- droplevels(houses.test$MSZoning)
+
+houses.train$Utilities <- NULL
+
+houses.test$Utilities <- NULL
+
+houses.train[LotConfig == "FR3"]$LotConfig <- "FR2"
+houses.train$LotConfig <- droplevels(houses.train$LotConfig)
+
+houses.test[LotConfig == "FR3"]$LotConfig <- "FR2"
+houses.test$LotConfig <- droplevels(houses.test$LotConfig)
+
+houses.train$BsmtQual <- droplevels(houses.train$BsmtQual)
+
+houses.test$BsmtQual <- droplevels(houses.test$BsmtQual)
+
+houses.train[BsmtCond == "Po"]$BsmtCond <- "Fa"
+houses.train$BsmtCond <- droplevels(houses.train$BsmtCond)
+
+houses.test[BsmtCond == "Po"]$BsmtCond <- "Fa"
+houses.test$BsmtCond <- droplevels(houses.test$BsmtCond)
 
 
 # Save data

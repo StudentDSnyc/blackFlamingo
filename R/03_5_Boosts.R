@@ -13,8 +13,10 @@ source("Helpers.R")
 # Load
 ##################
 source("./03_0_SplitEncode.R")
-load("./data/private.train.RData")
-load("./data/private.test.RData")
+load("./data/encoded.private.train.RData")
+load("./data/encoded.private.test.RData")
+#load("./data/private.train.RData")
+#load("./data/private.test.RData")
 
 
 
@@ -22,10 +24,14 @@ load("./data/private.test.RData")
 # Boosted Tree 
 ##################
 
+dim(private.test)
+
 # Create a private test set without SalePrice
 private.test$SalePrice = as.numeric(private.test$SalePrice)
-privatetest.noSP = private.test[ , -which(names(private.test) %in% c("SalePrice"))]
-housestest.noSP = houses.test[ , -which(names(houses.test) %in% c("SalePrice"))]
+privatetest.noSP = subset(private.test, select = -c(SalePrice))
+housestest.noSP = subset(houses.test, select = -c(SalePrice))
+
+
 
 library(gbm)
 library(caret)
@@ -75,7 +81,7 @@ boost.tuned.test = predict(boost.tuned, newdata = privatetest.noSP, n.trees = 15
 # Calculate test RMSE:
 tuned.RMSE = sqrt(mean((boost.tuned.test - log(private.test$SalePrice))^2))
 tuned.RMSE
-# 0.1360507
+# 0.1360507 on original non-encoded
 
 
 # Retrain on full training set houses.train
