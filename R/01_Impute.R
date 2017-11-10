@@ -157,6 +157,15 @@ levels(houses.train$PoolQC)[levels(houses.train$PoolQC) %in%
 levels(houses.test$PoolQC)[levels(houses.test$PoolQC) %in%
                                  c("Ex", "Gd", "TA", "Fa")] <- "Pool"
 
+#RoofStyle
+levels(houses.train$RoofStyle)[levels(houses.train$RoofStyle) %in% c("Shed", "Mansard", "Gambrel")]= "Other"
+
+#RoofMatl
+levels(houses.train$RoofMatl)[levels(houses.train$RoofMatl) %in% c("ClyTile", "Membran", "Metal", "Roll")]= "Other"
+levels(houses.train$RoofMatl)[levels(houses.train$RoofMatl) %in% c("WdShake", "WdShngl")]= "Wood"
+
+#HeatingQC
+levels(houses.train$HeatingQC) <- c(5,2,4,1,3)
 
 # Save data
 save(houses.train, houses.test, file = "./data/house_imputed.RData")
