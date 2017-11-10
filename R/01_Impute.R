@@ -92,4 +92,32 @@ houses.test$GarageArea[is.na(houses.test$GarageArea)] = round(mean(houses.test$G
 # Re-check
 NA.analysis(rbind(houses.train, houses.test))
 
+
+
+#################
+# Releveling #
+#################
+
+# Heating
+levels(houses.train$Heating)[levels(houses.train$Heating) %in% 
+                               c("Floor", "Grav", "OthW", "Wall")] <- "Other"
+
+# Functional
+levels(houses.train$Functional)[levels(houses.train$Functional) %in% 
+                                  c("Maj1", "Maj2", "Sev", "Sal")] <- "Maj"
+
+# Electrical
+levels(houses.train$Electrical)[levels(houses.train$Electrical) %in% 
+                                  c("FuseF", "FuseP", "Mix")] <- "FuseFP"
+
+# SaleType
+levels(houses.train$SaleType)[levels(houses.train$SaleType) %in% 
+                                c("ConLw", "ConLI", "ConLD", "Oth")] <- "Con"
+levels(houses.train$SaleType)[levels(houses.train$SaleType) %in% 
+                                c("CWD")] <- "WD"
+
+
+
+
+# Save data
 save(houses.train, houses.test, file = "./data/house_imputed.RData")
