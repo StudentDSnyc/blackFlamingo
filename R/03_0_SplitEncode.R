@@ -38,15 +38,6 @@ save(private.test, file = "./data/private.test.RData")
 write.csv(private.train, "private_train.csv", row.names = FALSE)
 write.csv(private.test, "private_test.csv", row.names = FALSE)
 
-##################
-# Encoding
-##################
-
-# Convert to data.frame (from data.table) to avoid bugs below
-# private.train <- as.data.frame(private.train)
-# private.test <- as.data.frame(private.test)
-# houses.train <- as.data.frame(houses.train)
-# houses.test <- as.data.frame(houses.test)
 
 ##################
 # Label Count Encoding - No, just puts number of occurences right now
@@ -85,6 +76,21 @@ cols <- colnames(encoded.private.test)
 encoded.private.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
 encoded.private.test[, c('SalePrice')] <- private.test$SalePrice
 
+# Zeroing NA columns
+encoded.private.test[, c('StreetPave')] <- 0
+encoded.private.test[, c('NeighborhoodBlueste')] <- 0
+encoded.private.test[, c('NeighborhoodVeenker')] <- 0
+encoded.private.test[, c('ExterCondPo')] <- 0
+encoded.private.test[, c('FoundationSlab')] <- 0
+encoded.private.test[, c('BsmtQualNA')] <- 0
+encoded.private.test[, c('BsmtCondNA')] <- 0
+encoded.private.test[, c('BsmtExposureNA')] <- 0
+encoded.private.test[, c('BsmtFinType1NA')] <- 0
+encoded.private.test[, c('BsmtFinType2NA')] <- 0
+encoded.private.test[, c('HeatingQC1')] <- 0
+encoded.private.test[, c('LotArea.LandContour.interaction1300.Low')] <- 0
+encoded.private.test[, c('LotArea.LandContour.interaction215245.Low')] <- 0
+
 encoded.houses.train <- as.data.table(stats::model.matrix(~., data=houses.train[ , -c("SalePrice")])[,-1])
 cols <- colnames(encoded.houses.train)
 encoded.houses.train[, (cols) := lapply(.SD, scale), .SDcols=cols]
@@ -103,6 +109,16 @@ encoded.houses.test[, c('SalePrice')] <- 0
 # encoded.private.test <- align.columns(encoded.private.train, encoded.private.test)
 # encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
 
+# Convert to data.frame (from data.table) 
+private.train <- as.data.frame(private.train)
+private.test <- as.data.frame(private.test)
+houses.train <- as.data.frame(houses.train)
+houses.test <- as.data.frame(houses.test)
+
+encoded.private.train <- as.data.frame(encoded.private.train)
+encoded.private.test <- as.data.frame(encoded.private.test)
+encoded.houses.train <- as.data.frame(encoded.houses.train)
+encoded.houses.test <- as.data.frame(encoded.houses.test)
 
 # Save encoded dataframes
 save(encoded.private.train, file = "./data/encoded.private.train.RData")

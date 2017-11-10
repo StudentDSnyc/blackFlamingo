@@ -12,7 +12,7 @@ source("Helpers.R")
 ##################
 # Load
 ##################
-source("./03_0_SplitEncode.R")
+# source("./03_0_SplitEncode.R")
 load("./data/private.train.RData")
 load("./data/private.test.RData")
 load("./data/encoded.private.train.RData")
@@ -23,7 +23,6 @@ load("./data/encoded.houses.test.RData")
 #######################
 # Baseline Linear Model
 #######################
-
 
 # Baseline linear model
 model.baseline <- lm(SalePrice ~ ., data=encoded.private.train)
@@ -49,9 +48,9 @@ sqrt(mean((predicted-actual)^2))
 ##################
 
 #Values of lambda over which to check.
-grid_lambda = 10^seq(1, -3, length = 20)
+grid_lambda = 10^seq(1, -3, length = 4)
 #plot(1:20, grid_lambda)
-grid_alpha = seq(0, 1, length=21)
+grid_alpha = seq(0, 1, length=4)
 
 # Cross-Validation for alpha & lambda
 set.seed(1000)
