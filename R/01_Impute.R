@@ -254,13 +254,16 @@ levels(houses.test$PoolQC)[levels(houses.test$PoolQC) %in%
 
 #RoofStyle
 levels(houses.train$RoofStyle)[levels(houses.train$RoofStyle) %in% c("Shed", "Mansard", "Gambrel")]= "Other"
+levels(houses.test$RoofStyle)[levels(houses.test$RoofStyle) %in% c("Shed", "Mansard", "Gambrel")]= "Other"
 
 #RoofMatl
 levels(houses.train$RoofMatl)[levels(houses.train$RoofMatl) %in% c("ClyTile", "Membran", "Metal", "Roll")]= "Other"
 levels(houses.train$RoofMatl)[levels(houses.train$RoofMatl) %in% c("WdShake", "WdShngl")]= "Wood"
 
-#HeatingQC
-levels(houses.train$HeatingQC) <- c(5,2,4,1,3)
+levels(houses.test$RoofMatl)[levels(houses.test$RoofMatl) %in% c("ClyTile", "Membran", "Metal", "Roll")]= "Other"
+levels(houses.test$RoofMatl)[levels(houses.test$RoofMatl) %in% c("WdShake", "WdShngl")]= "Wood"
+
+
 
 houses.train[MSSubClass == 40]$MSSubClass <- "20"
 houses.train[MSSubClass == 45]$MSSubClass <- "50"
