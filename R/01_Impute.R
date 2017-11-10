@@ -145,6 +145,7 @@ levels(houses.test$Exterior1st)[levels(houses.test$Exterior1st) %in%
                                    c("BrkComm", "BrkFace", "Brk Cmn", "Stone")] <- "Brick"
 levels(houses.test$Exterior1st)[levels(houses.test$Exterior1st) %in% 
                                    c("CBlock", "CemntBd")] <- "Cement"
+
 levels(houses.test$Exterior1st)[levels(houses.test$Exterior1st) %in% 
                                    c("ImStucc")] <- "Stucco"
 levels(houses.test$Exterior1st)[levels(houses.test$Exterior1st) %in% 
@@ -351,9 +352,13 @@ levels(houses.test$PoolQC)[levels(houses.test$PoolQC) %in%
 # GarageType
 levels(houses.train$GarageType)[levels(houses.train$GarageType) %in% 
                                   c("CarPort", "2Types")] <- "Other"
+levels(houses.test$GarageType)[levels(houses.test$GarageType) %in% 
+                                  c("CarPort", "2Types")] <- "Other"
 
 # MiscFeature
 levels(houses.train$MiscFeature)[levels(houses.train$MiscFeature) %in% 
+                                   c("Gar2", "Othr", "TenC")] <- "NA"
+levels(houses.test$MiscFeature)[levels(houses.test$MiscFeature) %in% 
                                    c("Gar2", "Othr", "TenC")] <- "NA"
 
 
@@ -407,6 +412,13 @@ houses.train$BsmtCond <- droplevels(houses.train$BsmtCond)
 
 houses.test[BsmtCond == "Po"]$BsmtCond <- "Fa"
 houses.test$BsmtCond <- droplevels(houses.test$BsmtCond)
+
+# MasVnrType
+houses.train$MasVnrType <- droplevels(houses.train$MasVnrType)
+houses.test$MasVnrType <- droplevels(houses.test$MasVnrType)
+
+houses.train <- droplevels(houses.train)
+houses.test <- droplevels(houses.test)
 
 
 

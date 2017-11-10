@@ -1,6 +1,6 @@
 library(devtools)
 #install_github("gathanei/xyz")
-library("xyz")
+# library("xyz")
 
 
 ##################
@@ -42,20 +42,40 @@ colnames(houses)[caret::nearZeroVar(houses, saveMetrics = F)]
 
 
 # Adding interaction variables
-houses[, c("Condition1.ExterCond.interaction") := list(with(houses, interaction(Condition1,  ExterCond)))]
-houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.1)), LandContour)))]
+houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.25)), LandContour)))]
 
 # Garage interaction (quality * number of cars)
 houses[, c("Garage.interaction") := list(with(houses, interaction(GarageCars, GarageQual)))] # Very positive effect
 # ignored warning message. Behaviour correct
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
+                                 c("4.ExGd", "5.ExGd")] <- "3.ExGd"
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
+                                    c("5.TA")] <- "4.TA"
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
+                                    c("4.FaPo", "5.FaPo")] <- "3.FaPo"
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
+                                    c("1.NA", "2.NA", "3.NA", "4.NA", "5.NA")] <- "0.NA"
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
+                                    c("0.ExGd", "0.TA", "0.FaPo")] <- "0.NA"
+houses[,Garage.interaction:=droplevels(Garage.interaction)] # drop unused levels
+
 
 # Basement interaction (quality of basement * number of (bath)rooms)
 houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
+houses[,Basement.interaction:=droplevels(Basement.interaction)]
+houses[,Basement.interaction:=droplevels(Basement.interaction)]
+
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in% c("0.ExGd", "0.TA", "0.FaPo")]
 
 # Additional Real Estate 'specialty' variables
 
 # Kitchen interaction (quality * number of cars)
 houses[, c("Kitchen.interaction") := list(with(houses, interaction(KitchenAbvGr, KitchenQual)))] # Negative
+houses[,Kitchen.interaction:=droplevels(Kitchen.interaction)] # drop unused levels
+levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("2.4")] <- "1.4"
+levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("0.3")] <- "1.3"
+levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("3.3")] <- "2.3"
+
 
 # When house was built/ remodelled compared to neighbourhood
 houses[, c("new.old") := list((YearBuilt) - mean(YearBuilt)), by = .(Neighborhood, MSSubClass)] # Negative effect

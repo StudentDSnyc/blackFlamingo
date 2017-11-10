@@ -83,7 +83,7 @@ encoded.private.train[, c('SalePrice')] <- private.train$SalePrice
 encoded.private.test <- as.data.table(stats::model.matrix(~., data=private.test[ , -c("SalePrice")])[,-1])
 cols <- colnames(encoded.private.test)
 encoded.private.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
-encoded.private.test[, c('SalePrice')] <- 0
+encoded.private.test[, c('SalePrice')] <- private.test$SalePrice
 
 encoded.houses.train <- as.data.table(stats::model.matrix(~., data=houses.train[ , -c("SalePrice")])[,-1])
 cols <- colnames(encoded.houses.train)
