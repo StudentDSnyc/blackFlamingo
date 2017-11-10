@@ -48,24 +48,25 @@ houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(q
 houses[, c("Garage.interaction") := list(with(houses, interaction(GarageCars, GarageQual)))] # Very positive effect
 # ignored warning message. Behaviour correct
 levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
-                                 c("4.ExGd", "5.ExGd")] <- "3.ExGd"
+                                 c("3.ExGd", "4.ExGd", "5.ExGd")] <- "2.ExGd"
 levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
                                     c("5.TA")] <- "4.TA"
 levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
-                                    c("4.FaPo", "5.FaPo")] <- "3.FaPo"
+                                    c("3.FaPo", "4.FaPo", "5.FaPo")] <- "2.FaPo"
 levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
                                     c("1.NA", "2.NA", "3.NA", "4.NA", "5.NA")] <- "0.NA"
 levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
                                     c("0.ExGd", "0.TA", "0.FaPo")] <- "0.NA"
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in%
+                                    c("1.ExGd")] <- "2.FaPo"
 houses[,Garage.interaction:=droplevels(Garage.interaction)] # drop unused levels
 
 
 # Basement interaction (quality of basement * number of (bath)rooms)
-houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
-houses[,Basement.interaction:=droplevels(Basement.interaction)]
-houses[,Basement.interaction:=droplevels(Basement.interaction)]
-
-levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in% c("0.ExGd", "0.TA", "0.FaPo")]
+# houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
+# houses[,Basement.interaction:=droplevels(Basement.interaction)]
+# houses[,Basement.interaction:=droplevels(Basement.interaction)]
+# levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in% c("0.ExGd", "0.TA", "0.FaPo")]
 
 # Additional Real Estate 'specialty' variables
 
