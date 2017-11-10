@@ -157,6 +157,43 @@ levels(houses.train$PoolQC)[levels(houses.train$PoolQC) %in%
 levels(houses.test$PoolQC)[levels(houses.test$PoolQC) %in%
                                  c("Ex", "Gd", "TA", "Fa")] <- "Pool"
 
+houses.train[MSSubClass == 40]$MSSubClass <- "20"
+houses.train[MSSubClass == 45]$MSSubClass <- "50"
+houses.train[MSSubClass == 75]$MSSubClass <- "60"
+houses.train[MSSubClass == 150]$MSSubClass <- "120"
+houses.train[MSSubClass == 180]$MSSubClass <- "160"
+houses.train$MSSubClass <- droplevels(houses.train$MSSubClass)
+
+houses.test[MSSubClass == 40]$MSSubClass <- "20"
+houses.test[MSSubClass == 45]$MSSubClass <- "50"
+houses.test[MSSubClass == 75]$MSSubClass <- "60"
+houses.test[MSSubClass == 150]$MSSubClass <- "120"
+houses.test[MSSubClass == 180]$MSSubClass <- "160"
+houses.test$MSSubClass <- droplevels(houses.test$MSSubClass)
+
+houses.train$MSZoning <- droplevels(houses.train$MSZoning)
+
+houses.test$MSZoning <- droplevels(houses.test$MSZoning)
+
+houses.train$Utilities <- NULL
+
+houses.test$Utilities <- NULL
+
+houses.train[LotConfig == "FR3"]$LotConfig <- "FR2"
+houses.train$LotConfig <- droplevels(houses.train$LotConfig)
+
+houses.test[LotConfig == "FR3"]$LotConfig <- "FR2"
+houses.test$LotConfig <- droplevels(houses.test$LotConfig)
+
+houses.train$BsmtQual <- droplevels(houses.train$BsmtQual)
+
+houses.test$BsmtQual <- droplevels(houses.test$BsmtQual)
+
+houses.train[BsmtCond == "Po"]$BsmtCond <- "Fa"
+houses.train$BsmtCond <- droplevels(houses.train$BsmtCond)
+
+houses.test[BsmtCond == "Po"]$BsmtCond <- "Fa"
+houses.test$BsmtCond <- droplevels(houses.test$BsmtCond)
 
 # Save data
 save(houses.train, houses.test, file = "./data/house_imputed.RData")
