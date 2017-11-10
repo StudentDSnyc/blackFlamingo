@@ -356,6 +356,20 @@ levels(houses.train$GarageType)[levels(houses.train$GarageType) %in%
 levels(houses.train$MiscFeature)[levels(houses.train$MiscFeature) %in% 
                                    c("Gar2", "Othr", "TenC")] <- "NA"
 
+
+#RoofStyle
+levels(houses.train$RoofStyle)[levels(houses.train$RoofStyle) %in% c("Shed", "Mansard", "Gambrel")]= "Other"
+levels(houses.test$RoofStyle)[levels(houses.test$RoofStyle) %in% c("Shed", "Mansard", "Gambrel")]= "Other"
+
+#RoofMatl
+levels(houses.train$RoofMatl)[levels(houses.train$RoofMatl) %in% c("ClyTile", "Membran", "Metal", "Roll")]= "Other"
+levels(houses.train$RoofMatl)[levels(houses.train$RoofMatl) %in% c("WdShake", "WdShngl")]= "Wood"
+
+levels(houses.test$RoofMatl)[levels(houses.test$RoofMatl) %in% c("ClyTile", "Membran", "Metal", "Roll")]= "Other"
+levels(houses.test$RoofMatl)[levels(houses.test$RoofMatl) %in% c("WdShake", "WdShngl")]= "Wood"
+
+
+
 houses.train[MSSubClass == 40]$MSSubClass <- "20"
 houses.train[MSSubClass == 45]$MSSubClass <- "50"
 houses.train[MSSubClass == 75]$MSSubClass <- "60"
@@ -393,6 +407,7 @@ houses.train$BsmtCond <- droplevels(houses.train$BsmtCond)
 
 houses.test[BsmtCond == "Po"]$BsmtCond <- "Fa"
 houses.test$BsmtCond <- droplevels(houses.test$BsmtCond)
+
 
 
 # Save data
