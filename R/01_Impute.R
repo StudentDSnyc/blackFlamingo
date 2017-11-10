@@ -116,7 +116,98 @@ levels(houses.train$SaleType)[levels(houses.train$SaleType) %in%
 levels(houses.train$SaleType)[levels(houses.train$SaleType) %in% 
                                 c("CWD")] <- "WD"
 
+# Foundation
+levels(houses.train$Foundation)[levels(houses.train$Foundation) %in% 
+                                  c("Stone", "Wood")] <- "Other"
 
+# Exterior1st
+levels(houses.train$Exterior1st)[levels(houses.train$Exterior1st) %in% 
+                                   c("AsbShng", "AsphShn", "WdShing")] <- "Shingles"
+levels(houses.train$Exterior1st)[levels(houses.train$Exterior1st) %in% 
+                                   c("BrkComm", "BrkFace", "Brk Cmn", "Stone")] <- "Brick"
+levels(houses.train$Exterior1st)[levels(houses.train$Exterior1st) %in% 
+                                   c("CBlock", "CemntBd")] <- "Cement"
+levels(houses.train$Exterior1st)[levels(houses.train$Exterior1st) %in% 
+                                   c("ImStucc")] <- "Stucco"
+levels(houses.train$Exterior1st)[levels(houses.train$Exterior1st) %in% 
+                                   c("Other")] <- "VinylSd"
+
+# Exterior2nd
+
+levels(houses.train$Exterior2nd)[levels(houses.train$Exterior2nd) %in% 
+                                   c("AsbShng", "AsphShn", "WdShing")] <- "Shingles"
+levels(houses.train$Exterior2nd)[levels(houses.train$Exterior2nd) %in% 
+                                   c("BrkComm", "BrkFace", "Brk Cmn", "Stone")] <- "Brick"
+levels(houses.train$Exterior2nd)[levels(houses.train$Exterior2nd) %in% 
+                                   c("CBlock", "CmentBd")] <- "Cement"
+levels(houses.train$Exterior2nd)[levels(houses.train$Exterior2nd) %in% 
+                                   c("ImStucc")] <- "Stucco"
+levels(houses.train$Exterior2nd)[levels(houses.train$Exterior2nd) %in% 
+                                   c("Other")] <- "VinylSd"
+
+# ExterQual - Ordinal numeric relevel
+levels(houses.train$ExterQual)[levels(houses.train$ExterQual) %in% 
+                                 c("Ex")] <- 5
+levels(houses.train$ExterQual)[levels(houses.train$ExterQual) %in% 
+                                 c("Gd")] <- 4
+levels(houses.train$ExterQual)[levels(houses.train$ExterQual) %in% 
+                                 c("TA")] <- 3
+levels(houses.train$ExterQual)[levels(houses.train$ExterQual) %in% 
+                                 c("Fa")] <- 2
+levels(houses.train$ExterQual)[levels(houses.train$ExterQual) %in% 
+                                 c("Po")] <- 1
+
+# ExterCond - Ordinal numeric relevel
+levels(houses.train$ExterCond)[levels(houses.train$ExterCond) %in% 
+                                 c("Ex")] <- 5
+levels(houses.train$ExterCond)[levels(houses.train$ExterQual) %in% 
+                                 c("Gd")] <- 4
+levels(houses.train$ExterCond)[levels(houses.train$ExterQual) %in% 
+                                 c("TA")] <- 3
+levels(houses.train$ExterCond)[levels(houses.train$ExterQual) %in% 
+                                 c("Fa")] <- 2
+levels(houses.train$ExterCond)[levels(houses.train$ExterQual) %in% 
+                                 c("Po")] <- 1
+
+# KitchenQual - Ordinal numeric relevel
+levels(houses.train$KitchenQual)[levels(houses.train$KitchenQual) %in% 
+                                   c("Ex")] <- 5
+levels(houses.train$KitchenQual)[levels(houses.train$KitchenQual) %in% 
+                                   c("Gd")] <- 4
+levels(houses.train$KitchenQual)[levels(houses.train$KitchenQual) %in% 
+                                   c("TA")] <- 3
+levels(houses.train$KitchenQual)[levels(houses.train$KitchenQual) %in% 
+                                   c("Fa")] <- 2
+levels(houses.train$KitchenQual)[levels(houses.train$KitchenQual) %in% 
+                                   c("Po")] <- 1
+
+# GarageQual
+levels(houses.train$GarageQual)[levels(houses.train$GarageQual) %in% 
+                                  c("Ex", "Gd")] <- "ExGd"
+levels(houses.train$GarageQual)[levels(houses.train$GarageQual) %in% 
+                                  c("Fa", "Po")] <- "FaPo"
+
+# GarageCond
+levels(houses.train$GarageCond)[levels(houses.train$GarageCond) %in% 
+                                  c("Ex", "Gd")] <- "ExGd"
+levels(houses.train$GarageCond)[levels(houses.train$GarageCond) %in% 
+                                  c("Fa", "Po")] <- "FaPo"
+
+# HeatingQC - Ordinal numeric relevel
+levels(houses.train$HeatingQC)[levels(houses.train$HeatingQC) %in% 
+                                   c("Ex")] <- 5
+levels(houses.train$HeatingQC)[levels(houses.train$HeatingQC) %in% 
+                                   c("Gd")] <- 4
+levels(houses.train$HeatingQC)[levels(houses.train$HeatingQC) %in% 
+                                   c("TA")] <- 3
+levels(houses.train$HeatingQC)[levels(houses.train$HeatingQC) %in% 
+                                   c("Fa")] <- 2
+levels(houses.train$HeatingQC)[levels(houses.train$HeatingQC) %in% 
+                                   c("Po")] <- 1
+
+# SaleCondition
+levels(houses.train$SaleCondition)[levels(houses.train$SaleCondition) %in% 
+                                 c("AdjLand")] <- "Abnorml"
 
 
 # Save data
