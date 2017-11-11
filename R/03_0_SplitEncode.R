@@ -81,12 +81,12 @@ encoded.private.test[, c('StreetPave')] <- 0
 encoded.private.test[, c('NeighborhoodBlueste')] <- 0
 encoded.private.test[, c('NeighborhoodVeenker')] <- 0
 encoded.private.test[, c('ExterCondPo')] <- 0
-encoded.private.test[, c('FoundationSlab')] <- 0
 encoded.private.test[, c('BsmtQualNA')] <- 0
 encoded.private.test[, c('BsmtCondNA')] <- 0
 encoded.private.test[, c('BsmtExposureNA')] <- 0
 encoded.private.test[, c('BsmtFinType1NA')] <- 0
 encoded.private.test[, c('BsmtFinType2NA')] <- 0
+encoded.private.test[, c('FoundationSlab')] <- 0
 encoded.private.test[, c('HeatingQC1')] <- 0
 encoded.private.test[, c('LotArea.LandContour.interaction1300.Low')] <- 0
 encoded.private.test[, c('LotArea.LandContour.interaction215245.Low')] <- 0
