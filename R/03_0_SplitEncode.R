@@ -54,12 +54,6 @@ write.csv(private.test, "private_test.csv", row.names = FALSE)
 # encoded.houses.train <- label.count.encode.df(houses.train)
 # encoded.houses.test <- label.count.encode.df(houses.test)
 # 
-# # Scale all columns except SalePrice
-# # Scaling test sets should really be done with means from training set
-# encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")] <- scale(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")])
-# encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")] <- scale(encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")])
-# encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")] <- scale(encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")])
-# encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")] <- scale(encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")])
 
 ##################
 # One hot Encoding
@@ -75,34 +69,61 @@ write.csv(private.test, "private_test.csv", row.names = FALSE)
 encoder <- vtreat::designTreatmentsN(dframe = private.train, # theoretically should use separate data to encode
                                      varlist = colnames(private.train),
                                      outcomename = "SalePrice",
-                                     rareCount=5,
-                                     rareSig=0.3,
+                                     rareCount=10,
+                                     rareSig=1,
                                      verbose=TRUE) 
 # Now encode both train and test
 encoded.private.train <- vtreat::prepare(encoder,
                                          private.train,
-                                         pruneSig=0.05,
-                                         scale = TRUE)
+                                         pruneSig=1,
+                                         scale = FALSE)
+
 encoded.private.test <- vtreat::prepare(encoder,
                                          private.test,
-                                         pruneSig=0.05,
-                                         scale = TRUE)
+                                         pruneSig=1,
+                                         scale = FALSE)
+
 # Same for houses.train/ houses.test
 encoder <- vtreat::designTreatmentsN(dframe = houses.train, # theoretically should use separate data to encode
                                      varlist = colnames(houses.train),
                                      outcomename = "SalePrice",
-                                     rareCount=5,
-                                     rareSig=0.3,
+                                     rareCount=10,
+                                     rareSig=1,
                                      verbose=TRUE) 
 # Now encode both train and test
 encoded.houses.train <- vtreat::prepare(encoder,
                                         houses.train,
-                                         pruneSig=0.05,
+                                         pruneSig=1,
                                          scale = TRUE)
+
 encoded.houses.test <- vtreat::prepare(encoder,
                                         houses.test,
-                                        pruneSig=0.05,
+                                        pruneSig=1,
                                         scale = TRUE)
+# Scale all columns except SalePrice
+# Scaling test sets should really be done with means from training set
+# encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")] <- scale(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")])
+# encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")] <- scale(encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")])
+# encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")] <- scale(encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")])
+# encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")] <- scale(encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")])
+
+# Scaling using scale & center from training sets
+encoded.private.train <- scale(encoded.private.train, center = FALSE)
+encoded.private.test <- scale(encoded.private.test, center = FALSE, attr(encoded.private.train, "scaled:scale"))
+encoded.houses.train <- scale(encoded.houses.train, center = FALSE)
+encoded.houses.test <- scale(encoded.houses.test, center = FALSE, attr(encoded.houses.train, "scaled:scale"))
+
+# Re-copy orignal y values (not scaled)
+encoded.private.train[, c('SalePrice')] <- private.train$SalePrice
+encoded.private.test[, c('SalePrice')] <- private.test$SalePrice
+encoded.houses.train[, c('SalePrice')] <- houses.train$SalePrice
+encoded.houses.test[, c('SalePrice')] <- 0
+
+# Convert to data.frame (from data.table) 
+encoded.private.train <- as.data.frame(encoded.private.train)
+encoded.private.test <- as.data.frame(encoded.private.test)
+encoded.houses.train <- as.data.frame(encoded.houses.train)
+encoded.houses.test <- as.data.frame(encoded.houses.test)
 
 # Using model.matrix (with data.table)
 ####################
@@ -150,19 +171,15 @@ encoded.houses.test <- vtreat::prepare(encoder,
 # encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
 
 # Cut any linear combinations or duplicate columns generated by dummify
-# lincomb <- findLinearCombos(encoded.private.train)
-# #lapply(lincomb$linearCombos, function(x) colnames(encode.private.train)[x])
-# 
-# encoded.private.train <- encoded.private.train %>% select(-lincomb$remove)
-# encoded.private.test <- encoded.private.test %>% select(-lincomb$remove)
-# 
-# encoded.houses.train <- encoded.houses.train %>% select(-lincomb$remove)
-# encoded.houses.test <- encoded.houses.test %>% select(-lincomb$remove)
+lincomb <- findLinearCombos(encoded.private.train)
+#lapply(lincomb$linearCombos, function(x) colnames(encode.private.train)[x])
 
-# encoded.private.train <- as.data.frame(encoded.private.train)
-# encoded.private.test <- as.data.frame(encoded.private.test)
-# encoded.houses.train <- as.data.frame(encoded.houses.train)
-# encoded.houses.test <- as.data.frame(encoded.houses.test)
+encoded.private.train <- encoded.private.train %>% select(-lincomb$remove)
+encoded.private.test <- encoded.private.test %>% select(-lincomb$remove)
+
+encoded.houses.train <- encoded.houses.train %>% select(-lincomb$remove)
+encoded.houses.test <- encoded.houses.test %>% select(-lincomb$remove)
+
 
 # Save encoded dataframes
 save(encoded.private.train, file = "./data/encoded.private.train.RData")

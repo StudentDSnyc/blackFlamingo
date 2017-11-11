@@ -63,19 +63,19 @@ houses[,Garage.interaction:=droplevels(Garage.interaction)] # drop unused levels
 
 
 # Basement interaction (quality of basement * number of (bath)rooms)
-# houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
-# houses[,Basement.interaction:=droplevels(Basement.interaction)]
-# houses[,Basement.interaction:=droplevels(Basement.interaction)]
-# levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in% c("0.ExGd", "0.TA", "0.FaPo")]
+houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
+houses[,Basement.interaction:=droplevels(Basement.interaction)]
+houses[,Basement.interaction:=droplevels(Basement.interaction)]
+levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in% c("0.ExGd", "0.TA", "0.FaPo")]
 
 # Additional Real Estate 'specialty' variables
 
-# Kitchen interaction (quality * number of cars)
-# houses[, c("Kitchen.interaction") := list(with(houses, interaction(KitchenAbvGr, KitchenQual)))] # Negative
-# houses[,Kitchen.interaction:=droplevels(Kitchen.interaction)] # drop unused levels
-# levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("2.4")] <- "1.4"
-# levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("0.3")] <- "1.3"
-# levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("3.3")] <- "2.3"
+# Kitchen interaction (quality * number of kitchens)
+houses[, c("Kitchen.interaction") := list(with(houses, interaction(KitchenAbvGr, KitchenQual)))] # Negative
+houses[,Kitchen.interaction:=droplevels(Kitchen.interaction)] # drop unused levels
+levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("2.4")] <- "1.4"
+levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("0.3")] <- "1.3"
+levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("3.3")] <- "2.3"
 
 
 # When house was built/ remodelled compared to neighbourhood
@@ -86,36 +86,22 @@ houses[, c("Room.size") := round((GrLivArea/ TotRmsAbvGrd))] # no effect?
 
 # Combine sold date year and month
 houses[, c("full.YrSold") := as.numeric(sprintf("%d%02d", YrSold, MoSold))] # add 0 in front of month digit as needed
-
 # Create quarter for seasonality
 houses[, c("QuarterSold") := (MoSold)]
 houses[MoSold %in% c(1, 2, 3), c("QuarterSold")] <- 1
 houses[MoSold %in% c(4, 5, 6), c("QuarterSold")] <- 2
 houses[MoSold %in% c(7, 8, 9), c("QuarterSold")] <- 3
 houses[MoSold %in% c(10, 11, 12), c("QuarterSold")] <- 4
-houses[, c("Year.Quarter") := paste0(YrSold, QuarterSold)] # only needed to merge HPI data in
 houses[,YrSold:=NULL]
 houses[, MoSold:=NULL]
-
-# HPI <- fread(paste0("../Data/", "AmesHPI_Clean.csv"), 
-#             header = TRUE,
-#             sep = ",",
-#             stringsAsFactors = FALSE,
-#             na.strings = NULL) # don't coerce "NA" string to NA
-# 
-# houses <- merge(houses, HPI, by.x = "Year.Quarter", by.y = "Year.Quarter")
-
-# Cleanup
-# rm(HPI)
-houses[, Year.Quarter:=NULL]
 
 # Number of bathrooms. Only count basement bathrooms if there's a 'finished' basement area 
 houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + .5*HalfBath + BsmtFullBath + .5*BsmtHalfBath)] # Positive Effect
 houses[BsmtFinSF1==00, TotalBath := list(FullBath + .5*HalfBath)]
 
 # Ratio of bathrooms to bedrooms (all above ground), compared to neighbourhood ratio # Negative
-houses[BedroomAbvGr>0, c("BathToBed") := ((FullBath + .5*HalfBath)/ BedroomAbvGr)/ mean((FullBath + .5*HalfBath)/ BedroomAbvGr), by = .(Neighborhood)]
-houses[BedroomAbvGr==0, c("BathToBed")] <- 0
+# houses[BedroomAbvGr>0, c("BathToBed") := ((FullBath + .5*HalfBath)/ BedroomAbvGr)/ mean((FullBath + .5*HalfBath)/ BedroomAbvGr), by = .(Neighborhood)]
+# houses[BedroomAbvGr==0, c("BathToBed")] <- 0
 
 # Ratio: House surface to median for neighbourhood/ type of dwelling (e.g. 1-STORY 1945 & OLDER)
 houses[, c("AvgHouseLivArea.ratio") := (GrLivArea)/ mean(GrLivArea), by = .(Neighborhood, MSSubClass)] # Positive effect
