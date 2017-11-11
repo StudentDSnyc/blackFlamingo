@@ -60,14 +60,36 @@ RMSEbc <- function(data, lev = NULL, model = NULL){
 # Encoding functions
 ##########################
 
-encode.scale.df <- function(df){
-  # Creates dummy variables and scale the whole dataframe
+# encode.scale.df <- function(df){
+#   # Creates dummy variables and scale the whole dataframe
+# 
+#   encoded.df <- stats::model.matrix(~., data=df)
+#   cat("Encoded dataframe dimensions: ", dim(encoded.df))
+#   
+#   data.frame(lapply(encoded.df, scale))
+# }
 
-  encoded.df <- stats::model.matrix(~., data=df)
-  cat("Encoded dataframe dimensions: ", dim(encoded.df))
+encode.scale.df <- function(df, outcomename = "SalePrice"){
+  # Creates dummy variables and scale the whole dataframe
   
-  data.frame(lapply(encoded.df, scale))
+  set.seed(0)
+  vtreat.encoder.df <- vtreat::designTreatmentsN(dframe = df,
+                                                 varlist = colnames(df),
+                                                 outcomename = outcomename,
+                                                 rareCount=5,
+                                                 rareSig=0.3,
+                                                 verbose=TRUE) # creates a "treatmentplan"
+  
+  encoded.df <- as.data.frame(vtreat::prepare(vtreat.encoder.df,
+                                              df,
+                                              pruneSig=0.05,
+                                              scale = TRUE))
+                                              
+  cat("Encoded dataframe dimensions: ", dim(encoded.df))
+  # data.frame(lapply(encoded.df, scale))
+  encoded.df
 }
+
 
 # Code to scale numeric features only
 # indices <- sapply(houses, is.numeric)

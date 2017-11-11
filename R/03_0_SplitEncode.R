@@ -30,6 +30,12 @@ train.indices = sample(1:nrow(houses.train), nrow(houses.train)*split.ratio)
 private.train = houses.train[train.indices,] # dim: 1168, 80 + engineered
 private.test = houses.train[-train.indices,] # dim: 292, 80 + engineered
 
+# Convert to data.frame (from data.table) 
+private.train <- as.data.frame(private.train)
+private.test <- as.data.frame(private.test)
+houses.train <- as.data.frame(houses.train)
+houses.test <- as.data.frame(houses.test)
+
 # Save unencoded dataframes
 save(private.train, file = "./data/private.train.RData")
 save(private.test, file = "./data/private.test.RData")
@@ -62,42 +68,78 @@ write.csv(private.test, "private_test.csv", row.names = FALSE)
 # One-hot encode categorical features using vtreat
 # Scale all features including dummy ones per: https://stats.stackexchange.com/questions/69568/whether-to-rescale-indicator-binary-dummy-predictors-for-lasso
 
-# old version with dataframes
-# encoded.private.train <- encode.scale.df(private.train[ , -which(names(private.train) == "SalePrice")])
-# encoded.private.train['SalePrice'] <- private.train$SalePrice
+# Using vtreat (with data.frame)
+##############
 
-encoded.private.train <- as.data.table(stats::model.matrix(~., data=private.train[ , -c("SalePrice")])[,-1])
-cols <- colnames(encoded.private.train)
-encoded.private.train[, (cols) := lapply(.SD, scale), .SDcols=cols]
-encoded.private.train[, c('SalePrice')] <- private.train$SalePrice
+# Create encoder 
+encoder <- vtreat::designTreatmentsN(dframe = private.train, # theoretically should use separate data to encode
+                                     varlist = colnames(private.train),
+                                     outcomename = "SalePrice",
+                                     rareCount=5,
+                                     rareSig=0.3,
+                                     verbose=TRUE) 
+# Now encode both train and test
+encoded.private.train <- vtreat::prepare(encoder,
+                                         private.train,
+                                         pruneSig=0.05,
+                                         scale = TRUE)
+encoded.private.test <- vtreat::prepare(encoder,
+                                         private.test,
+                                         pruneSig=0.05,
+                                         scale = TRUE)
+# Same for houses.train/ houses.test
+encoder <- vtreat::designTreatmentsN(dframe = houses.train, # theoretically should use separate data to encode
+                                     varlist = colnames(houses.train),
+                                     outcomename = "SalePrice",
+                                     rareCount=5,
+                                     rareSig=0.3,
+                                     verbose=TRUE) 
+# Now encode both train and test
+encoded.houses.train <- vtreat::prepare(encoder,
+                                        houses.train,
+                                         pruneSig=0.05,
+                                         scale = TRUE)
+encoded.houses.test <- vtreat::prepare(encoder,
+                                        houses.test,
+                                        pruneSig=0.05,
+                                        scale = TRUE)
 
-encoded.private.test <- as.data.table(stats::model.matrix(~., data=private.test[ , -c("SalePrice")])[,-1])
-cols <- colnames(encoded.private.test)
-encoded.private.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
-encoded.private.test[, c('SalePrice')] <- private.test$SalePrice
+# Using model.matrix (with data.table)
+####################
 
-# Zeroing NA columns
-encoded.private.test[, c('StreetPave')] <- 0
-encoded.private.test[, c('NeighborhoodBlueste')] <- 0
-encoded.private.test[, c('NeighborhoodVeenker')] <- 0
-encoded.private.test[, c('ExterCondPo')] <- 0
-encoded.private.test[, c('BsmtQualNA')] <- 0
-encoded.private.test[, c('BsmtCondNA')] <- 0
-encoded.private.test[, c('BsmtExposureNA')] <- 0
-encoded.private.test[, c('BsmtFinType1NA')] <- 0
-encoded.private.test[, c('BsmtFinType2NA')] <- 0
-encoded.private.test[, c('FoundationSlab')] <- 0
-encoded.private.test[, c('HeatingQC1')] <- 0
+# encoded.private.train <- as.data.table(stats::model.matrix(~., data=private.train[ , -c("SalePrice")])[,-1])
+# cols <- colnames(encoded.private.train)
+# encoded.private.train[, (cols) := lapply(.SD, scale), .SDcols=cols]
+# encoded.private.train[, c('SalePrice')] <- private.train$SalePrice
+# 
+# encoded.private.test <- as.data.table(stats::model.matrix(~., data=private.test[ , -c("SalePrice")])[,-1])
+# cols <- colnames(encoded.private.test)
+# encoded.private.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
+# encoded.private.test[, c('SalePrice')] <- private.test$SalePrice
+# 
+# # Zeroing NA columns
+# encoded.private.test[, c('StreetPave')] <- 0
+# encoded.private.test[, c('NeighborhoodBlueste')] <- 0
+# encoded.private.test[, c('NeighborhoodVeenker')] <- 0
+# encoded.private.test[, c('ExterCondPo')] <- 0
+# encoded.private.test[, c('BsmtQualNA')] <- 0
+# encoded.private.test[, c('BsmtCondNA')] <- 0
+# encoded.private.test[, c('BsmtExposureNA')] <- 0
+# encoded.private.test[, c('BsmtFinType1NA')] <- 0
+# encoded.private.test[, c('BsmtFinType2NA')] <- 0
+# encoded.private.test[, c('FoundationSlab')] <- 0
+# encoded.private.test[, c('HeatingQC1')] <- 0
+# 
+# encoded.houses.train <- as.data.table(stats::model.matrix(~., data=houses.train[ , -c("SalePrice")])[,-1])
+# cols <- colnames(encoded.houses.train)
+# encoded.houses.train[, (cols) := lapply(.SD, scale), .SDcols=cols]
+# encoded.houses.train[, c('SalePrice')] <- houses.train$SalePrice
+# 
+# encoded.houses.test <- as.data.table(stats::model.matrix(~., data=houses.test[ , -c("SalePrice")])[,-1])
+# cols <- colnames(encoded.houses.test)
+# encoded.houses.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
+# encoded.houses.test[, c('SalePrice')] <- 0
 
-encoded.houses.train <- as.data.table(stats::model.matrix(~., data=houses.train[ , -c("SalePrice")])[,-1])
-cols <- colnames(encoded.houses.train)
-encoded.houses.train[, (cols) := lapply(.SD, scale), .SDcols=cols]
-encoded.houses.train[, c('SalePrice')] <- houses.train$SalePrice
-
-encoded.houses.test <- as.data.table(stats::model.matrix(~., data=houses.test[ , -c("SalePrice")])[,-1])
-cols <- colnames(encoded.houses.test)
-encoded.houses.test[, (cols) := lapply(.SD, scale), .SDcols=cols]
-encoded.houses.test[, c('SalePrice')] <- 0
 
 
 # Add missing columns in test set with default value equal to 0
@@ -107,26 +149,20 @@ encoded.houses.test[, c('SalePrice')] <- 0
 # encoded.private.test <- align.columns(encoded.private.train, encoded.private.test)
 # encoded.houses.test <- align.columns(encoded.houses.train, encoded.houses.test)
 
-# Convert to data.frame (from data.table) 
-private.train <- as.data.frame(private.train)
-private.test <- as.data.frame(private.test)
-houses.train <- as.data.frame(houses.train)
-houses.test <- as.data.frame(houses.test)
-
 # Cut any linear combinations or duplicate columns generated by dummify
-lincomb <- findLinearCombos(encoded.private.train)
-#lapply(lincomb$linearCombos, function(x) colnames(encode.private.train)[x])
+# lincomb <- findLinearCombos(encoded.private.train)
+# #lapply(lincomb$linearCombos, function(x) colnames(encode.private.train)[x])
+# 
+# encoded.private.train <- encoded.private.train %>% select(-lincomb$remove)
+# encoded.private.test <- encoded.private.test %>% select(-lincomb$remove)
+# 
+# encoded.houses.train <- encoded.houses.train %>% select(-lincomb$remove)
+# encoded.houses.test <- encoded.houses.test %>% select(-lincomb$remove)
 
-encoded.private.train <- encoded.private.train %>% select(-lincomb$remove)
-encoded.private.test <- encoded.private.test %>% select(-lincomb$remove)
-
-encoded.houses.train <- encoded.houses.train %>% select(-lincomb$remove)
-encoded.houses.test <- encoded.houses.test %>% select(-lincomb$remove)
-
-encoded.private.train <- as.data.frame(encoded.private.train)
-encoded.private.test <- as.data.frame(encoded.private.test)
-encoded.houses.train <- as.data.frame(encoded.houses.train)
-encoded.houses.test <- as.data.frame(encoded.houses.test)
+# encoded.private.train <- as.data.frame(encoded.private.train)
+# encoded.private.test <- as.data.frame(encoded.private.test)
+# encoded.houses.train <- as.data.frame(encoded.houses.train)
+# encoded.houses.test <- as.data.frame(encoded.houses.test)
 
 # Save encoded dataframes
 save(encoded.private.train, file = "./data/encoded.private.train.RData")

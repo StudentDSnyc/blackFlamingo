@@ -417,6 +417,10 @@ houses.test$BsmtCond <- droplevels(houses.test$BsmtCond)
 houses.train$MasVnrType <- droplevels(houses.train$MasVnrType)
 houses.test$MasVnrType <- droplevels(houses.test$MasVnrType)
 
+# Street
+houses.train$Street <- NULL
+houses.test$Street <- NULL
+
 houses.train <- droplevels(houses.train)
 houses.test <- droplevels(houses.test)
 
