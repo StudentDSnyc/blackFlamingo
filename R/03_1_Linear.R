@@ -13,30 +13,30 @@ source("Helpers.R")
 # Load
 ##################
 # source("./03_0_SplitEncode.R")
-load("./data/private.train.RData")
-load("./data/private.test.RData")
-load("./data/encoded.private.train.RData")
-load("./data/encoded.private.test.RData")
-load("./data/encoded.houses.train.RData")
-load("./data/encoded.houses.test.RData")
+load("./data/Xprivate.train.RData")
+load("./data/Xprivate.test.RData")
+load("./data/Xencoded.private.train.RData")
+load("./data/Xencoded.private.test.RData")
+load("./data/Xencoded.houses.train.RData")
+load("./data/Xencoded.houses.test.RData")
 
 #######################
 # Baseline Linear Model
 #######################
 
 # Baseline linear model
-model.baseline <- lm(SalePrice ~ ., data=encoded.private.train)
+model.baseline <- lm(SalePrice ~ ., data=Xencoded.private.train)
 summary(model.baseline)
 
 bc <- boxCox(model.baseline)
 bc.lambda = bc$x[which(bc$y == max(bc$y))]
 
-x <- encoded.private.train %>% select(-SalePrice)
-y <- (encoded.private.train$SalePrice^bc.lambda - 1)/bc.lambda
+x <- Xencoded.private.train %>% select(-SalePrice)
+y <- (Xencoded.private.train$SalePrice^bc.lambda - 1)/bc.lambda
 
 model.bc <- lm(y ~ . , data=x)
 
-predicted <- predict(model.bc, encoded.private.test, na.action = na.exclude) 
+predicted <- predict(model.bc, Xencoded.private.test, na.action = na.exclude) 
 predicted <- log(unbox(predicted, bc.lambda))
 actual <-log(private.test$SalePrice)
 

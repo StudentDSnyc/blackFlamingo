@@ -20,40 +20,19 @@ houses[,sapply(houses, function(x) length(unique(x))) <= 1]
 
 # Find features with low variances
 colnames(houses)[caret::nearZeroVar(houses, saveMetrics = F)]
-# Drop features - commenting because worst results
-# houses <-houses[, -which(names(houses) %in% c("Utilities", "RoofMatl")), with=FALSE]
-
-
-# Interactions # Prints interaction but not sure how to create the features we need or get model using them
-# result <- xyz_regression(data.matrix(houses[1:1460, -which(names(houses) == "SalePrice"), with=FALSE]),
-#                houses[1:1460, ][["SalePrice"]], # using list subsetting '[[' to access data.table column (fast)
-#                lambdas = 10^seq(1, -3, length = 10), n_lambda = 10,
-#                alpha = 0.1, L = 10,
-#                standardize = TRUE,
-#                standardize_response = TRUE)
-
-# Interaction effect:
-# Interaction effect: (4,8) coefficient: -0.1066311 # LotArea LandContour       # ok makes sense
-
-# Interaction effect: (14,14) coefficient: -0.08428927
-# Interaction effect: (30,72) coefficient: 0.07212801
-# Interaction effect: (4,4) coefficient: -0.0693587
-# Interaction effect: (3,26) coefficient: 0.06451609
-# Interaction effect: (3,43) coefficient: -0.06385154
-
 
 # Adding interaction variables
 
 # Lot landscape-ablility
 # houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.25)), LandContour)))]
 # houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(LotArea, LandContour)))]
-# houses[, c("LotShape.LandContour.interaction") := list(with(houses, interaction(LotShape, LandContour)))]
-# levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
-#                                     c("IR1.Bnk", "IR2.Bnk", "IR3.Bnk")] <- "IR.Bnk"
-# levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
-#                                                   c("IR1.HLS", "IR2.HLS", "IR3.HLS")] <- "IR.HLS"
-# levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
-#                                                   c("IR1.Low", "IR2.Low", "IR3.Low")] <- "IR.Low"
+houses[, c("LotShape.LandContour.interaction") := list(with(houses, interaction(LotShape, LandContour)))]
+levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
+                                    c("IR1.Bnk", "IR2.Bnk", "IR3.Bnk")] <- "IR.Bnk"
+levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
+                                                  c("IR1.HLS", "IR2.HLS", "IR3.HLS")] <- "IR.HLS"
+levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
+                                                  c("IR1.Low", "IR2.Low", "IR3.Low")] <- "IR.Low"
 
 
 # Garage interaction (quality * number of cars)
@@ -99,16 +78,6 @@ houses[, c("Room.size") := round((GrLivArea/TotRmsAbvGrd))] # no effect?
 # Number of rooms
 houses[, ]
 
-# Combine sold date year and month
-houses[, c("full.YrSold") := as.numeric(sprintf("%d%02d", YrSold, MoSold))] # add 0 in front of month digit as needed
-# Create quarter for seasonality
-houses[, c("QuarterSold") := (MoSold)]
-houses[MoSold %in% c(1, 2, 3), c("QuarterSold")] <- 1
-houses[MoSold %in% c(4, 5, 6), c("QuarterSold")] <- 2
-houses[MoSold %in% c(7, 8, 9), c("QuarterSold")] <- 3
-houses[MoSold %in% c(10, 11, 12), c("QuarterSold")] <- 4
-houses[,YrSold:=NULL]
-houses[, MoSold:=NULL]
 
 # Number of bathrooms. Only count basement bathrooms if there's a 'finished' basement area 
 # houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + .5*HalfBath + BsmtFullBath + .5*BsmtHalfBath)] # Positive Effect
@@ -155,4 +124,36 @@ fwrite(houses.test, file = "../Data/Xfeatures_houses_test.csv", quote=F, row.nam
 # houses[, c("LotToHouseRatio") := list(LotArea/ GrLivArea)] # Negative effect
 # Same adjusted by type of Zoning (e.g. high density)
 # houses[, c("LotToHouseSurfaceRatio") := list((LotArea/ GrLivArea)/ mean(LotArea/ GrLivArea)), by = .(MSZoning)] # Negative effect
+
+# Drop features - commenting because worst results
+# houses <-houses[, -which(names(houses) %in% c("Utilities", "RoofMatl")), with=FALSE]
+
+# Combine sold date year and month
+# houses[, c("full.YrSold") := as.numeric(sprintf("%d%02d", YrSold, MoSold))] # add 0 in front of month digit as needed
+# Create quarter for seasonality
+# houses[, c("QuarterSold") := (MoSold)]
+# houses[MoSold %in% c(1, 2, 3), c("QuarterSold")] <- 1
+# houses[MoSold %in% c(4, 5, 6), c("QuarterSold")] <- 2
+# houses[MoSold %in% c(7, 8, 9), c("QuarterSold")] <- 3
+# houses[MoSold %in% c(10, 11, 12), c("QuarterSold")] <- 4
+# houses[,YrSold:=NULL]
+# houses[, MoSold:=NULL]
+
+
+# Interactions # Prints interaction but not sure how to create the features we need or get model using them
+# result <- xyz_regression(data.matrix(houses[1:1460, -which(names(houses) == "SalePrice"), with=FALSE]),
+#                houses[1:1460, ][["SalePrice"]], # using list subsetting '[[' to access data.table column (fast)
+#                lambdas = 10^seq(1, -3, length = 10), n_lambda = 10,
+#                alpha = 0.1, L = 10,
+#                standardize = TRUE,
+#                standardize_response = TRUE)
+
+# Interaction effect:
+# Interaction effect: (4,8) coefficient: -0.1066311 # LotArea LandContour       # ok makes sense
+
+# Interaction effect: (14,14) coefficient: -0.08428927
+# Interaction effect: (30,72) coefficient: 0.07212801
+# Interaction effect: (4,4) coefficient: -0.0693587
+# Interaction effect: (3,26) coefficient: 0.06451609
+# Interaction effect: (3,43) coefficient: -0.06385154
 
