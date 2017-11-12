@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.linear_model import ElasticNet
 from sklearn.model_selection import KFold
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_squared_log_error
 from sklearn.base import clone
 import pandas as pd
 
@@ -23,8 +23,8 @@ def append_meta_features(S_train, S_test, x_train, x_test=None):
     return new_train, new_test
 
 def stacking_regression(models, default_X_train, default_y_train, default_X_test,
-             transform_target=None, transform_pred=None,
-             metric=None, n_folds=3, average_fold=True,
+             default_transform_target=None, default_transform_pred=None,
+             default_metric=None, n_folds=3, average_fold=True,
              shuffle=False, random_state=0, verbose=1):
     '''
     Function 'stacking' takes train data, test data, list of 1-st level
@@ -110,12 +110,12 @@ x`
     '''
 
     # Specify default metric for cross-validation
-    if metric is None:
-        metric = mean_squared_error
+    if default_metric is None:
+        default_metric = mean_squared_error
 
     # Print metric
     if verbose > 0:
-        print('metric: [%s]\n' % metric.__name__)
+        print('metric: [%s]\n' % default_metric.__name__)
 
     # Split indices to get folds
     kf = KFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
@@ -135,12 +135,32 @@ x`
             X_train = model['X_train']
             y_train = model['y_train']
             X_test = model['X_test']
+            
+            if 'metric' in model:
+                metric = model['metric']
+            else:
+                metric = default_metric
+
+            if 'transform_target' in model:
+                transform_target = model['transform_target']
+            else:
+                transform_target = default_transform_target
+
+            if 'transform_pred' in model:
+                transform_pred = model['transform_pred']
+            else:
+                transform_pred = default_transform_pred
+
             model = model['model']
+
             print('model has own dataset')
         else:
             X_train = default_X_train
             y_train = default_y_train
             X_test = default_X_test
+            metric = default_metric
+            transform_target = default_transform_target
+            transform_pred = default_transform_pred
             print('using default dataset')
 
         if verbose > 0:
