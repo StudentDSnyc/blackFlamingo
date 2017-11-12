@@ -13,8 +13,8 @@ source("Helpers.R")
 # Load
 ##################
 # source("./03_0_SplitEncode.R")
-load("./data/private.train.RData")
-load("./data/private.test.RData")
+load("./data/Xprivate.train.RData")
+load("./data/Xprivate.test.RData")
 load("./data/encoded.private.train.RData")
 load("./data/encoded.private.test.RData")
 load("./data/encoded.houses.train.RData")
@@ -59,8 +59,8 @@ filt.encoded.houses.train <- encoded.houses.train[-c(524),]
 require(boot) # Library to perform cross validation on linear regression with cv.glm
 # Cross Validation error
 set.seed(10)
-cv.linear.model <- glm(log(SalePrice) ~ ., data=filt.encoded.houses.train)
-cv.err <- cv.glm(filt.encoded.houses.train, cv.linear.model, RMSE, K = 5)$delta[1]
+cv.linear.model <- glm(log(SalePrice) ~ ., data=encoded.houses.train)
+cv.err <- cv.glm(encoded.houses.train, cv.linear.model, RMSE, K = 5)$delta[1]
 cv.err
 # Problem: not sure how to retrieve the cv predictions from here (to see where model is weak)
 
@@ -69,7 +69,7 @@ set.seed(2)
 # 5 fold regression
 train.control <- trainControl("cv", 5, savePred=T)
 fit <- train(log(SalePrice) ~ ., 
-             data=filt.encoded.houses.train,
+             data=encoded.houses.train,
              method="glm",
              trControl=train.control)
 
@@ -101,6 +101,7 @@ head(fit$pred)
 sqrt(mean((fit$pred$pred - fit$pred$obs)^2)) # 0.2058208 Doesn't help
 
 # Splines
+set.seed(123)
 require(splines)
 fit <- train(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6) 
              -YearBuilt_clean +bs(YearBuilt_clean, df=6), 
@@ -113,8 +114,80 @@ head(fit$pred)
 # RMSE
 sqrt(mean((fit$pred$pred - fit$pred$obs)^2)) # 0.126197
 
+# Spline CV
+set.seed(1331)
+folds <- createFolds(rownames(encoded.houses.train), k=5)
+splines.predictions <- list(K1=c(), K2=c(), K3=c(), K4=c(), K5=c())
+
+# K1
+spline.fit <- glm(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6), # df=6
+                  data=encoded.houses.train[-folds$Fold1, ])
+splines.predictions$K1 <- predict(spline.fit, 
+                                  newdata = encoded.houses.train[folds$Fold1, -which(names(encoded.houses.train) == "SalePrice")])
+# RMSE for the fold
+sqrt(mean((splines.predictions$K1 - log(encoded.houses.train[folds$Fold1,c("SalePrice")]))^2))
 
 
+# K2
+spline.fit <- glm(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6), # df=6
+                  data=encoded.houses.train[-folds$Fold2, ])
+splines.predictions$K2 <- predict(spline.fit, 
+                                  newdata = encoded.houses.train[folds$Fold2, -which(names(encoded.houses.train) == "SalePrice")])
+# RMSE for the fold
+sqrt(mean((splines.predictions$K2 - log(encoded.houses.train[folds$Fold2,c("SalePrice")]))^2))
+
+# K3 
+spline.fit <- glm(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6), # df=6
+                  data=encoded.houses.train[-folds$Fold3, ])
+splines.predictions$K3 <- predict(spline.fit, 
+                                  newdata = encoded.houses.train[folds$Fold3, -which(names(encoded.houses.train) == "SalePrice")])
+# RMSE for the fold
+sqrt(mean((splines.predictions$K3 - log(encoded.houses.train[folds$Fold3,c("SalePrice")]))^2))
+
+
+# K4
+spline.fit <- glm(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6), # df=6
+                  data=encoded.houses.train[-folds$Fold4, ])
+splines.predictions$K4 <- predict(spline.fit, 
+                                  newdata = encoded.houses.train[folds$Fold4, -which(names(encoded.houses.train) == "SalePrice")])
+# RMSE for the fold
+sqrt(mean((splines.predictions$K4 - log(encoded.houses.train[folds$Fold4,c("SalePrice")]))^2))
+
+# K5
+spline.fit <- glm(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6), # df=6
+                    data=encoded.houses.train[-folds$Fold5, ])
+splines.predictions$K5 <- predict(spline.fit, 
+                                    newdata = encoded.houses.train[folds$Fold5, -which(names(encoded.houses.train) == "SalePrice")])
+# RMSE for the fold
+sqrt(mean((splines.predictions$K5 - log(encoded.houses.train[folds$Fold5,c("SalePrice")]))^2))
+
+splines.cv <- c(splines.predictions$K1, 
+                splines.predictions$K2, 
+                splines.predictions$K3, 
+                splines.predictions$K4, 
+                splines.predictions$K5)
+
+splines.cv <- splines.cv[order(c(folds$Fold1, folds$Fold2, folds$Fold3, folds$Fold4, folds$Fold5))]
+
+# Total RMSE
+sqrt(mean((splines.cv_ - log(encoded.houses.train[,c("SalePrice")]))^2))
+
+
+
+write.csv(data.frame(Id = 1:1460, splines_features = exp(splines.cv)), 
+          paste(format(Sys.time(),'%Y-%m-%d %H-%M-%S'), "splines_features.csv"), 
+          row.names = FALSE)
+
+# Get houses.test prediction
+
+spline.fit <- glm(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6), # df=6
+                  data=encoded.houses.train)
+splines.predictions.test <- predict(spline.fit, 
+                                  newdata = encoded.houses.test)
+
+write.csv(data.frame(Id = 1:1459, splines_predictions = exp(splines.predictions.test)), 
+          paste(format(Sys.time(),'%Y-%m-%d %H-%M-%S'), "splines_predictions.csv"), 
+          row.names = FALSE)
 
 ##################
 # Regularization

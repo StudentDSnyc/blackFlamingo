@@ -1,0 +1,37 @@
+Slides
+========================================================
+author: Black Flamingos
+date: November 2017
+autosize: true
+
+Cleaning/Imputing/Releveling
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+Splitting and Encoding
+========================================================
+
+```{r}
+summary(cars)
+```
+
+Modeling (Process)
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Modeling (Training)
+========================================================
+
+Stacking
+========================================================
+
+KAGGLE
+========================================================
