@@ -7,6 +7,7 @@ library(devtools)
 # Load
 ##################
 library(data.table)
+source('01_Impute.R')
 
 load("./data/house_imputed.RData") 
 class(houses.train) # "data.table" "data.frame"
@@ -42,7 +43,18 @@ colnames(houses)[caret::nearZeroVar(houses, saveMetrics = F)]
 
 
 # Adding interaction variables
+
+# Lot landscape-ablility
 # houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(quantile(houses$LotArea, probs = seq(0, 1, 0.25)), LandContour)))]
+# houses[, c("LotArea.LandContour.interaction") := list(with(houses, interaction(LotArea, LandContour)))]
+# houses[, c("LotShape.LandContour.interaction") := list(with(houses, interaction(LotShape, LandContour)))]
+# levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
+#                                     c("IR1.Bnk", "IR2.Bnk", "IR3.Bnk")] <- "IR.Bnk"
+# levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
+#                                                   c("IR1.HLS", "IR2.HLS", "IR3.HLS")] <- "IR.HLS"
+# levels(houses$LotShape.LandContour.interaction)[levels(houses$LotShape.LandContour.interaction) %in%
+#                                                   c("IR1.Low", "IR2.Low", "IR3.Low")] <- "IR.Low"
+
 
 # Garage interaction (quality * number of cars)
 houses[, c("Garage.interaction") := list(with(houses, interaction(GarageCars, GarageQual)))] # Very positive effect
@@ -63,26 +75,29 @@ houses[,Garage.interaction:=droplevels(Garage.interaction)] # drop unused levels
 
 
 # Basement interaction (quality of basement * number of (bath)rooms)
-houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
-houses[,Basement.interaction:=droplevels(Basement.interaction)]
-houses[,Basement.interaction:=droplevels(Basement.interaction)]
-levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in% c("0.ExGd", "0.TA", "0.FaPo")]
+# houses[, c("Basement.interaction") := list(with(houses, interaction(BsmtQual, (BsmtFullBath+BsmtHalfBath))))]
+# houses[,Basement.interaction:=droplevels(Basement.interaction)]
+# houses[,Basement.interaction:=droplevels(Basement.interaction)]
+# levels(houses$Garage.interaction)[levels(houses$Garage.interaction) %in% c("0.ExGd", "0.TA", "0.FaPo")]
 
 # Additional Real Estate 'specialty' variables
 
 # Kitchen interaction (quality * number of kitchens)
-houses[, c("Kitchen.interaction") := list(with(houses, interaction(KitchenAbvGr, KitchenQual)))] # Negative
-houses[,Kitchen.interaction:=droplevels(Kitchen.interaction)] # drop unused levels
-levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("2.4")] <- "1.4"
-levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("0.3")] <- "1.3"
-levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("3.3")] <- "2.3"
+# houses[, c("Kitchen.interaction") := list(with(houses, interaction(KitchenAbvGr, KitchenQual)))] # Negative
+# houses[,Kitchen.interaction:=droplevels(Kitchen.interaction)] # drop unused levels
+# levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("2.4")] <- "1.4"
+# levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("0.3")] <- "1.3"
+# levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("3.3")] <- "2.3"
 
 
 # When house was built/ remodelled compared to neighbourhood
-houses[, c("new.old") := list((YearBuilt) - mean(YearBuilt)), by = .(Neighborhood, MSSubClass)] # Negative effect
+# houses[, c("new.old") := list((YearBuilt) - mean(YearBuilt)), by = .(Neighborhood, MSSubClass)] # Negative effect
 
-# Average (above ground) room size (compared to Neighborhood)
-houses[, c("Room.size") := round((GrLivArea/ TotRmsAbvGrd))] # no effect?
+# Average (above ground) room size
+houses[, c("Room.size") := round((GrLivArea/TotRmsAbvGrd))] # no effect?
+
+# Number of rooms
+houses[, ]
 
 # Combine sold date year and month
 houses[, c("full.YrSold") := as.numeric(sprintf("%d%02d", YrSold, MoSold))] # add 0 in front of month digit as needed
@@ -96,15 +111,20 @@ houses[,YrSold:=NULL]
 houses[, MoSold:=NULL]
 
 # Number of bathrooms. Only count basement bathrooms if there's a 'finished' basement area 
-houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + .5*HalfBath + BsmtFullBath + .5*BsmtHalfBath)] # Positive Effect
-houses[BsmtFinSF1==00, TotalBath := list(FullBath + .5*HalfBath)]
+# houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + .5*HalfBath + BsmtFullBath + .5*BsmtHalfBath)] # Positive Effect
+# houses[BsmtFinSF1==00, TotalBath := list(FullBath + .5*HalfBath)]
+houses[BsmtFinSF1>0, c("TotalBath") := list(FullBath + HalfBath + BsmtFullBath + BsmtHalfBath)] # Positive Effect
+houses[BsmtFinSF1==00, TotalBath := list(FullBath + HalfBath)]
+
 
 # Ratio of bathrooms to bedrooms (all above ground), compared to neighbourhood ratio # Negative
 # houses[BedroomAbvGr>0, c("BathToBed") := ((FullBath + .5*HalfBath)/ BedroomAbvGr)/ mean((FullBath + .5*HalfBath)/ BedroomAbvGr), by = .(Neighborhood)]
-# houses[BedroomAbvGr==0, c("BathToBed")] <- 0
+houses[BedroomAbvGr==0, c("BathToBed")] <- 0
+houses[BedroomAbvGr > 0, c("BathToBed") := (FullBath + HalfBath)/BedroomAbvGr]
 
 # Ratio: House surface to median for neighbourhood/ type of dwelling (e.g. 1-STORY 1945 & OLDER)
-houses[, c("AvgHouseLivArea.ratio") := (GrLivArea)/ mean(GrLivArea), by = .(Neighborhood, MSSubClass)] # Positive effect
+#houses[, c("AvgHouseLivArea.ratio") := (GrLivArea)/ mean(GrLivArea), by = .(Neighborhood, MSSubClass)] # Positive effect
+houses[, c("AvgHouseLivArea.ratio") := (GrLivArea)/ mean(GrLivArea)]
 
 # Put SalePrice back in the last position
 setcolorder(houses, c(setdiff(names(houses), "SalePrice"), "SalePrice"))
@@ -119,12 +139,12 @@ dim(houses.train)
 ##################
 
 # to .RData
-save(houses.train, file = "./data/houses.train.RData")
-save(houses.test, file = "./data/houses.test.RData")
+save(houses.train, file = "./data/Xhouses.train.RData")
+save(houses.test, file = "./data/Xhouses.test.RData")
 
 # to .csv
-fwrite(houses.train, file = "../Data/features_houses_train.csv", quote=F, row.names=T)
-fwrite(houses.test, file = "../Data/features_houses_test.csv", quote=F, row.names=T)
+fwrite(houses.train, file = "../Data/Xfeatures_houses_train.csv", quote=F, row.names=T)
+fwrite(houses.test, file = "../Data/Xfeatures_houses_test.csv", quote=F, row.names=T)
 
 
 # Rejected features
