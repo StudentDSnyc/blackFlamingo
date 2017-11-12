@@ -43,14 +43,87 @@ actual <-log(private.test$SalePrice)
 # RMSE
 sqrt(mean((predicted-actual)^2))
 
+# Plot actual vs predicted
+plot(actual, predicted)
+text(actual, predicted, labels=rownames(private.test), cex= 0.7, pos=3)
+abline(0, 1)
+
+#######################
+# Cross Validation Linear Model
+#######################
+
+# Remove Outliers
+which(encoded.houses.train$SalePrice==184750) # index 524
+filt.encoded.houses.train <- encoded.houses.train[-c(524),]
+
+require(boot) # Library to perform cross validation on linear regression with cv.glm
+# Cross Validation error
+set.seed(10)
+cv.linear.model <- glm(log(SalePrice) ~ ., data=filt.encoded.houses.train)
+cv.err <- cv.glm(filt.encoded.houses.train, cv.linear.model, RMSE, K = 5)$delta[1]
+cv.err
+# Problem: not sure how to retrieve the cv predictions from here (to see where model is weak)
+
+require(caret)
+set.seed(2)
+# 5 fold regression
+train.control <- trainControl("cv", 5, savePred=T)
+fit <- train(log(SalePrice) ~ ., 
+             data=filt.encoded.houses.train,
+             method="glm",
+             trControl=train.control)
+
+# show predictions from CV
+head(fit$pred)
+# RMSE
+sqrt(mean((fit$pred$pred - fit$pred$obs)^2)) 
+# Display outlier prediction
+fit$pred[which(fit$pred$obs==log(184750)),] # very bad (3x the price)
+
+# with outlier: 0.1439189
+# without outlier: 0.1538019 !! improves model (?) despite huge error that it contributes
+
+# Quadratic test
+require(caret)
+set.seed(2)
+# 5 fold regression
+train.control <- trainControl("cv", 5, savePred=T)
+
+f <- as.formula(paste0("log(SalePrice) ~ poly(", paste0(colnames(filt.encoded.houses.train[ , -which(names(filt.encoded.houses.train) == "SalePrice")]), collapse = ' + '), ", 2)"))
+
+fit <- train(f, 
+             data=filt.encoded.houses.train,
+             method="glm",
+             trControl=train.control)
+# show predictions from CV
+head(fit$pred)
+# RMSE
+sqrt(mean((fit$pred$pred - fit$pred$obs)^2)) # 0.2058208 Doesn't help
+
+# Splines
+require(splines)
+fit <- train(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6) 
+             -YearBuilt_clean +bs(YearBuilt_clean, df=6), 
+             data=encoded.houses.train,
+             method="glm",
+             trControl=train.control)
+
+# show predictions from CV
+head(fit$pred)
+# RMSE
+sqrt(mean((fit$pred$pred - fit$pred$obs)^2)) # 0.126197
+
+
+
+
 ##################
 # Regularization
 ##################
 
 #Values of lambda over which to check.
-grid_lambda = 10^seq(1, -3, length = 20)
+grid_lambda = 10^seq(1, -3, length = 5)
 #plot(1:20, grid_lambda)
-grid_alpha = seq(0, 1, length=21)
+grid_alpha = seq(0, 1, length=6)
 
 # Cross-Validation for alpha & lambda
 set.seed(1000)
@@ -84,12 +157,6 @@ tune.grid = expand.grid(lambda = grid_lambda, alpha=grid_alpha)
 
 # f <- as.formula( ~ .*.) 
 # x <- model.matrix(f, encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")])[, -1] 
-# 
-# glmnet.caret = train(x, 
-#                      (encoded.private.train$SalePrice^bc.lambda - 1)/bc.lambda,
-#                      method = 'glmnet',
-#                      trControl = train.control, 
-#                      tuneGrid = tune.grid)
 
 # end test variations
 
@@ -122,10 +189,6 @@ glmnet.caret.full.training = glmnet(x, y,
 
 linear.pred.full.training = predict(glmnet.caret.full.training, 
                                     newx = z)
-
-# Test quadratic
-# f <- as.formula(paste0("SalePrice ~ poly(", paste0(colnames(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")]), collapse = ' + '), ", 2)"))
-
 
 # Create submission file
 write.csv(data.frame(Id = 1461:2919, SalePrice = unbox(linear.pred.full.training[,1], bc.lambda)), 

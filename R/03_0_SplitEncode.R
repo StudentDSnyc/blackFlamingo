@@ -176,9 +176,9 @@ lincomb <- findLinearCombos(encoded.private.train)
 encoded.private.train <- encoded.private.train %>% select(-lincomb$remove)
 encoded.private.test <- encoded.private.test %>% select(-lincomb$remove)
 
-lincomb <- findLinearCombos(encoded.houses.train)
-encoded.houses.train <- encoded.houses.train %>% select(-lincomb$remove)
-encoded.houses.test <- encoded.houses.test %>% select(-lincomb$remove)
+# lincomb <- findLinearCombos(encoded.houses.train)
+# encoded.houses.train <- encoded.houses.train %>% select(-lincomb$remove)
+# encoded.houses.test <- encoded.houses.test %>% select(-lincomb$remove)
 
 
 # Save encoded dataframes
