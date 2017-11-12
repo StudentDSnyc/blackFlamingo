@@ -170,5 +170,5 @@ x`
     #                            "SalePrice": S_train[:,0]})
     # submission_test.submission.to_csv("./Ensemble Submissions/submission_test {}.csv".format(time), sep=',', index = False)
 
-    return S_test
+    return S_train, S_test
     #return stacking_prediction
