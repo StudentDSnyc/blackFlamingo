@@ -13,18 +13,27 @@ def transformer(y, func=None):
     else:
         return func(y)
 
+def append_meta_features(S_train, S_test, x_train, x_test=None):
+    new_train = np.append(S_train, x_train, 1)
+    if x_test is not None:
+        new_test = np.append(S_test, x_test, 1)
+    else:
+        new_test = S_test
 
-def stacking_regression(models, meta_model, X_train, y_train, X_test,
+    return new_train, new_test
+
+def stacking_regression(models, default_X_train, default_y_train, default_X_test,
              transform_target=None, transform_pred=None,
              metric=None, n_folds=3, average_fold=True,
              shuffle=False, random_state=0, verbose=1):
     '''
     Function 'stacking' takes train data, test data, list of 1-st level
-    models, meta_model for the 2-nd level and returns stacking predictions.
+    models and returns stacked_features for train data and test data for
+    for feeding into 2-nd level metal model.
 
     Parameters
     ----------
-    models : list
+    models : list of models dictionaries {'model', 'X_train', 'y_train', 'X_test'}
         List of 1-st level models. You can use any models that follow sklearn
         convention i.e. accept numpy arrays and have methods 'fit' and 'predict'.
 
@@ -111,16 +120,29 @@ x`
     # Split indices to get folds
     kf = KFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
 
-    if X_train.__class__.__name__ == "DataFrame":
-    	X_train = X_train.as_matrix()
-    	X_test = X_test.as_matrix()
+    if default_X_train.__class__.__name__ == "DataFrame":
+    	default_X_train = default_X_train.as_matrix()
+    	default_X_test = default_X_test.as_matrix()
 
     # Create empty numpy arrays for stacking features
-    S_train = np.zeros((X_train.shape[0], len(models)))
-    S_test = np.zeros((X_test.shape[0], len(models)))
+    S_train = np.zeros((default_X_train.shape[0], len(models)))
+    S_test = np.zeros((default_X_test.shape[0], len(models)))
 
     # Loop across models
     for model_counter, model in enumerate(models):
+        # check if model has a custom X_train, y_train, X_test
+        if(type(model) is dict):
+            X_train = model['X_train']
+            y_train = model['y_train']
+            X_test = model['X_test']
+            model = model['model']
+            print('model has own dataset')
+        else:
+            X_train = default_X_train
+            y_train = default_y_train
+            X_test = default_X_test
+            print('using default dataset')
+
         if verbose > 0:
             print('model %d: [%s]' % (model_counter, model.__class__.__name__))
 
@@ -159,9 +181,9 @@ x`
             print('    MEAN:   [%.8f]\n' % (metric(y_train, S_train[:, model_counter])))
 
     # Fit our second layer meta model
-    meta_model.fit(X=S_train, y=transformer(y_train, func = transform_target))
+    #meta_model.fit(X=S_train, y=transformer(y_train, func = transform_target))
     # Make our final prediction
-    stacking_prediction = transformer(meta_model.predict(S_test), func = transform_pred)
+    #stacking_prediction = transformer(meta_model.predict(S_test), func = transform_pred)
 
     # print(S_train.shape)
     # print(S_train[:,0])
