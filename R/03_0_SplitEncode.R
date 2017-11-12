@@ -41,8 +41,8 @@ save(private.train, file = "./data/Xprivate.train.RData")
 save(private.test, file = "./data/Xprivate.test.RData")
 
 # Save unencoded dataframes as csvs
-write.csv(private.train, "Xprivate_train.csv", row.names = FALSE)
-write.csv(private.test, "Xprivate_test.csv", row.names = FALSE)
+write.csv(private.train, "../Data/Xprivate_train.csv", row.names = FALSE)
+write.csv(private.test, "../Data/Xprivate_test.csv", row.names = FALSE)
 
 
 ##################
