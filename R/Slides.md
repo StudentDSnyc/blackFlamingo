@@ -7,40 +7,64 @@ autosize: true
 Cleaning/Imputing/Releveling
 ========================================================
 
-For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+- Straight mode imputing for most; other-column-dependent mode imputing otherwise
+- 
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+Feature Engineering
+========================================================
+
+- Garage interaction: GarageQual * GarageCars
+- Total bathrooms: FullBath + HalfBath + BsmtFullBath + BsmtHalfBath
+- Average room size: GrLivArea / TotRmsAbvGrd
+- Bathroom to room ratio: (FullBath + HalfBath) / BedroomAbvGr
+- Comparative size of living area: GrLivArea / mean(GrLivArea)
+- Landscape-ability interaction: LotShape, LotContour
+
+
 
 Splitting and Encoding
 ========================================================
 
+- Split Kaggle train data into 'private train' and 'private test' (80/20)
+- Encoding: Label-count encoding for tree models; one-hot encoding for linear, ridge/lasso, elastic net
 
-```r
-summary(cars)
-```
-
-```
-     speed           dist       
- Min.   : 4.0   Min.   :  2.00  
- 1st Qu.:12.0   1st Qu.: 26.00  
- Median :15.0   Median : 36.00  
- Mean   :15.4   Mean   : 42.98  
- 3rd Qu.:19.0   3rd Qu.: 56.00  
- Max.   :25.0   Max.   :120.00  
-```
-
-Modeling (Process)
+Modeling Process (individual models)
 ========================================================
 
-![plot of chunk unnamed-chunk-2](Slides-figure/unnamed-chunk-2-1.png)
+- Grid search to tune hyper parameters (if applicable)
+- Fit model to private train set with tuned parameters
+- Predict on private test set; if okay, proceed...
 
-Modeling (Training)
+- Fit new model to Kaggle train set with private train hyperparameters
+- Cross-validate on Kaggle train set; if okay, proceed...
+
+- Predict on Kaggle test set
+- Submit to Kaggle; deal with feelings of mediocrity
+
+
+Models Trained
 ========================================================
+(In R and Python)
+
+- Multiple linear, spline
+- Ridge, LASSO, elastic net
+- Decision tree (basic)
+- Random Forest
+- Gradient boosted forest
+- XGBoosted forest
+
 
 Stacking
 ========================================================
+
+Following Zeyu:
+
+- Spline 
+- Random Forest
+- 2 GBM
+- 1 XGBoost
+
+Meta model: GBM
 
 KAGGLE
 ========================================================
