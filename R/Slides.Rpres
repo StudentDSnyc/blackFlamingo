@@ -20,9 +20,7 @@ Goal: Improve predictions for "average" houses at the expense of predictions for
 Inspecting a categorical feature with rare levels (<1% of data):
 
 ```{r summary, echo=FALSE}
-source('./Features.R')
-load("./data/Xhouses.train.RData")
-load("./data/Xhouses.test.RData")
+load("./data/house_loaded.RData")
 library(dplyr)
 
 select(houses.train, Heating) %>% group_by(Heating) %>%
