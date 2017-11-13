@@ -81,8 +81,16 @@ levels(houses$Kitchen.interaction)[levels(houses$Kitchen.interaction) %in% c("3.
 # When house was built/ remodelled compared to neighbourhood
 houses[, c("new.old") := list((YearBuilt) - mean(YearBuilt)), by = .(Neighborhood, MSSubClass)] # Negative effect
 
+<<<<<<< HEAD
+# Average (above ground) room size
+houses[, c("Room.size") := round((GrLivArea/TotRmsAbvGrd))] # no effect?
+
+# Number of rooms
+# houses[, ]
+=======
 # Average (above ground) room size (compared to Neighborhood)
 houses[, c("Room.size") := round((GrLivArea/ TotRmsAbvGrd))] # no effect?
+>>>>>>> bd57254214b934c805c9127820d1d446b0772ab7
 
 # Combine sold date year and month
 houses[, c("full.YrSold") := as.numeric(sprintf("%d%02d", YrSold, MoSold))] # add 0 in front of month digit as needed
