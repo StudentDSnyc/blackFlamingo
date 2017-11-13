@@ -1,14 +1,54 @@
+
 Slides
 ========================================================
 author: Black Flamingos
 date: November 2017
 autosize: true
 
-Cleaning/Imputing/Releveling
+Cleaning/Imputing
 ========================================================
 
-- Straight mode imputing for most; other-column-dependent mode imputing otherwise
-- 
+- Straight mode imputing for most 
+- Other-column-dependent mode imputing otherwise
+
+Releveling 
+========================================================
+(Linear only)
+
+Goal: Improve predictions for "average" houses at the expense of predictions for "rare" houses
+
+Inspecting a categorical feature with rare levels (<1% of data):
+
+
+```
+# A tibble: 6 x 2
+  Heating `n()`
+   <fctr> <int>
+1   Floor     1
+2    GasA  1428
+3    GasW    18
+4    Grav     7
+5    OthW     2
+6    Wall     4
+```
+
+Solution:
+
+```r
+levels(houses.train$Heating)[levels(houses.train$Heating) %in% 
+                               c("Floor", "Grav", "OthW", "Wall")] <- "Other"
+```
+
+
+```
+# A tibble: 3 x 2
+  Heating `n()`
+   <fctr> <int>
+1   Other    14
+2    GasA  1428
+3    GasW    18
+```
+
 
 Feature Engineering
 ========================================================
@@ -59,9 +99,7 @@ Stacking
 
 Following Zeyu:
 
-- Spline 
-- Random Forest
-- 2 GBM
+- 1 Spline 
 - 1 XGBoost
 
 Meta model: GBM
