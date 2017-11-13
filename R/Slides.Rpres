@@ -8,13 +8,27 @@ autosize: false
 Cleaning/Imputing
 ========================================================
 
-(INSERT HEADER)
+Dealing with Missing Data
 
-- Straight mode imputing for most 
-- Other-column-dependent mode imputing otherwise
+ - Straight mode imputing for most 
+ - Other-column-dependent mode imputing otherwise
+
+![Missing Data](missingdata.jpg)
+
+Cleaning/Imputing
+========================================================
+
+Imputing Lot Frontage
+
+![Frontage](frontage_impute1.jpg)
+
+Outliers
+========================================================
 
 ![Influence Plot](influenceplot.jpeg)
 ![Residuals Leverage](Residuals-Leverage.jpeg)
+
+
 Releveling 
 ========================================================
 
@@ -30,6 +44,9 @@ select(houses.train, Heating) %>% group_by(Heating) %>%
   summarise(n())
 ```
 
+Releveling 
+========================================================
+
 Solution:
 ```{r relevel, echo=TRUE}
 levels(houses.train$Heating)[levels(houses.train$Heating) %in% 
@@ -40,8 +57,13 @@ levels(houses.train$Heating)[levels(houses.train$Heating) %in%
 select(houses.train, Heating) %>% group_by(Heating) %>%
   summarise(n())
 ```
+ 
+Releveling 
+========================================================
 
-
+Additional problems addressed:
+![Releveling Diagram](releveling_motivation.jpg)
+ 
 Feature Engineering
 ========================================================
 

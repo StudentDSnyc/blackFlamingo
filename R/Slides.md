@@ -8,16 +8,31 @@ autosize: false
 Cleaning/Imputing
 ========================================================
 
-- Straight mode imputing for most 
-- Other-column-dependent mode imputing otherwise
+Dealing with Missing Data
+
+ - Straight mode imputing for most 
+ - Other-column-dependent mode imputing otherwise
+
+![Missing Data](missingdata.jpg)
+
+Cleaning/Imputing
+========================================================
+
+Imputing Lot Frontage
+
+![Frontage](frontage_impute1.jpg)
+
+Outliers
+========================================================
 
 ![Influence Plot](influenceplot.jpeg)
 ![Residuals Leverage](Residuals-Leverage.jpeg)
+
+
 Releveling 
 ========================================================
-(Linear only)
 
-Goal: Improve predictions for "average" houses at the expense of predictions for "rare" houses
+Goal: Improve predictions for "average" houses at the expense of predictions for "rare" houses (linear only)
 
 Inspecting a categorical feature with rare levels (<1% of data):
 
@@ -33,6 +48,9 @@ Inspecting a categorical feature with rare levels (<1% of data):
 5    OthW     2
 6    Wall     4
 ```
+
+Releveling 
+========================================================
 
 Solution:
 
@@ -50,10 +68,17 @@ levels(houses.train$Heating)[levels(houses.train$Heating) %in%
 2    GasA  1428
 3    GasW    18
 ```
+ 
+Releveling 
+========================================================
 
-
+Additional problems addressed:
+![Releveling Diagram](releveling_motivation.jpg)
+ 
 Feature Engineering
 ========================================================
+
+a.k.a. Reading about real estate
 
 - Garage interaction: GarageQual * GarageCars
 - Total bathrooms: FullBath + HalfBath + BsmtFullBath + BsmtHalfBath
@@ -67,11 +92,22 @@ Feature Engineering
 Splitting and Encoding
 ========================================================
 
-- Split Kaggle train data into 'private train' and 'private test' (80/20)
-- Encoding: Label-count encoding for tree models; one-hot encoding for linear, ridge/lasso, elastic net
+Treat data for tree-based and linear-based models separately:
 
-Modeling Process (individual models)
+For tree-based models:
+
+- Split Kaggle train data into 'private train' and 'private test' (80/20)
+- Label-count encode
+
+
+For linear-based models:
+
+- Encoding: one-hot encoding 
+
+Modeling Process 
 ========================================================
+
+Individual models
 
 - Grid search to tune hyper parameters (if applicable)
 - Fit model to private train set with tuned parameters
@@ -86,25 +122,38 @@ Modeling Process (individual models)
 
 Models Trained
 ========================================================
-(In R and Python)
+
+In R and Python:
 
 - Multiple linear, spline
 - Ridge, LASSO, elastic net
 - Decision tree (basic)
-- Random Forest
+- Random forest
 - Gradient boosted forest
 - XGBoosted forest
 
 
-Stacking
+Stacking...then averaging
 ========================================================
 
 Following Zeyu:
 
 - 1 Spline 
 - 1 XGBoost
+- Meta model: GBM
 
-Meta model: GBM
+In the end, averaging the predictions for our spline and our XGBoost 
+was better than stacking, so that's what we ended with.
 
-KAGGLE
+Discussion
 ========================================================
+
+Results and lessons
+
+- Best Kaggle score/rank: .1218, 639/2288
+- Git checkout is amazing!! 
+
+
+
+
+
