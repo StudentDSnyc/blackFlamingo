@@ -3,7 +3,7 @@ Slides
 ========================================================
 author: Black Flamingos
 date: November 2017
-autosize: true
+autosize: false
 
 Cleaning/Imputing
 ========================================================
@@ -11,6 +11,8 @@ Cleaning/Imputing
 - Straight mode imputing for most 
 - Other-column-dependent mode imputing otherwise
 
+![Influence Plot](influenceplot.jpeg)
+![Residuals Leverage](Residuals-Leverage.jpeg)
 Releveling 
 ========================================================
 (Linear only)
