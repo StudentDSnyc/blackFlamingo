@@ -86,5 +86,5 @@ for (varname in names(houses.test)[-1]) {
 houses.train$Id <- NULL
 rownames(houses.test) <- houses.test$Id
 houses.test$Id <- NULL
-save(houses.train, houses.test, file = "./data/house_loaded.RData")
+save(houses.train, houses.test, file = "./data/house_cleaned.RData")
 
