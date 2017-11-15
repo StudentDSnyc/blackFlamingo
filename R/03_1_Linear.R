@@ -103,6 +103,7 @@ sqrt(mean((fit$pred$pred - fit$pred$obs)^2)) # 0.2058208 Doesn't help
 # Splines
 set.seed(123)
 require(splines)
+train.control <- trainControl("cv", 10, savePred=T)
 fit <- train(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6) 
              -YearBuilt_clean +bs(YearBuilt_clean, df=6), 
              data=encoded.houses.train,
@@ -113,6 +114,21 @@ fit <- train(log(SalePrice) ~ .-GrLivArea_clean +bs(GrLivArea_clean, df=6)
 head(fit$pred)
 # RMSE
 sqrt(mean((fit$pred$pred - fit$pred$obs)^2)) # 0.126197
+
+
+# Plot spline? ISLR p.289
+# par(mfrow=c(1,2),mar=c(4.5,4.5,1,1) ,oma=c(0,0,4,0))
+# plot(age,wage,xlim=agelims ,cex=.5,col="darkgrey")
+# title("Plot",outer=T)
+# x_axis=seq(from=0,to=range(encoded.houses.train$GrLivArea_clean)[1])
+# lines(splines.cv,preds$fit,lwd=2,col="blue")
+# # > matlines(age.grid,se.bands,lwd=1,col="blue",lty=3)
+
+# Plot spline?
+plot(encoded.houses.train, splines.cv)
+text(encoded.houses.train, splines.cv, labels=rownames(splines.cv), cex= 0.7, pos=3)
+lines(encoded.houses.train,splines.cv$fit,lwd=2,col="blue") # plot splines
+abline(0, 1)
 
 # Spline CV
 set.seed(1331)
@@ -161,6 +177,7 @@ splines.predictions$K5 <- predict(spline.fit,
 # RMSE for the fold
 sqrt(mean((splines.predictions$K5 - log(encoded.houses.train[folds$Fold5,c("SalePrice")]))^2))
 
+# Prediction CV
 splines.cv <- c(splines.predictions$K1, 
                 splines.predictions$K2, 
                 splines.predictions$K3, 
@@ -170,7 +187,7 @@ splines.cv <- c(splines.predictions$K1,
 splines.cv <- splines.cv[order(c(folds$Fold1, folds$Fold2, folds$Fold3, folds$Fold4, folds$Fold5))]
 
 # Total RMSE
-sqrt(mean((splines.cv_ - log(encoded.houses.train[,c("SalePrice")]))^2))
+sqrt(mean((splines.cv - log(encoded.houses.train[,c("SalePrice")]))^2))
 
 
 
