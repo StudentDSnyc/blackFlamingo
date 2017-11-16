@@ -277,12 +277,6 @@ encoded.houses.test <- vtreat::prepare(encoder,
                                        houses.test,
                                        pruneSig=1,
                                        scale = TRUE)
-# Scale all columns except SalePrice
-# Scaling test sets should really be done with means from training set
-# encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")] <- scale(encoded.private.train[ , -which(names(encoded.private.train) == "SalePrice")])
-# encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")] <- scale(encoded.private.test[ , -which(names(encoded.private.test) == "SalePrice")])
-# encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")] <- scale(encoded.houses.train[ , -which(names(encoded.houses.train) == "SalePrice")])
-# encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")] <- scale(encoded.houses.test[ , -which(names(encoded.houses.test) == "SalePrice")])
 
 # Scaling using scale & center from training sets
 encoded.private.train <- scale(encoded.private.train, center = FALSE)
@@ -291,10 +285,10 @@ encoded.houses.train <- scale(encoded.houses.train, center = FALSE)
 encoded.houses.test <- scale(encoded.houses.test, center = FALSE, attr(encoded.houses.train, "scaled:scale"))
 
 # Convert to data.frame (from matrix) 
-encoded.private.train <- as.data.frame.numeric(encoded.private.train)
-encoded.private.test <- as.data.frame.numeric(encoded.private.test)
-encoded.houses.train <- as.data.frame.numeric(encoded.houses.train)
-encoded.houses.test <- as.data.frame.numeric(encoded.houses.test)
+encoded.private.train <- as.data.frame(encoded.private.train)
+encoded.private.test <- as.data.frame(encoded.private.test)
+encoded.houses.train <- as.data.frame(encoded.houses.train)
+encoded.houses.test <- as.data.frame(encoded.houses.test)
 
 # Re-copy orignal y values (not scaled)
 encoded.private.train[, c('SalePrice')] <- private.train$SalePrice
